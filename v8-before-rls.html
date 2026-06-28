@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HUSTLE.OS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#09090f;--surface:#111118;--card:#18181f;--border:#26263a;
+  --accent:#7c3aed;--accent2:#06d6a0;--accent3:#f59e0b;
+  --danger:#ef4444;--text:#f1f0f5;--muted:#8b8a9a;
+  --pb:#f5f5f7;--pt:#1d1d1f;--pc:#fff;--pborder:#e5e5ea;--pmuted:#8e8e93;
+  --pblue:#007AFF;--pgreen:#34C759;--pred:#FF3B30;
+}
+html,body{height:100%;background:var(--black);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;background:none}
+input{font-family:inherit;outline:none}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* LANDING */
+#screen-landing{background:var(--black);color:var(--text)}
+.nav{position:sticky;top:0;z-index:100;background:rgba(9,9,15,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:58px}
+.logo{font-size:19px;font-weight:800;letter-spacing:-1px}
+.logo span{color:var(--accent)}
+.nav-cta{background:var(--accent);color:#fff;padding:9px 20px;border-radius:10px;font-weight:700;font-size:14px}
+.hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:48px 20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(124,58,237,.2) 0%,transparent 68%);pointer-events:none}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.13);
+  border:1px solid rgba(124,58,237,.3);color:var(--accent);font-size:13px;font-weight:600;
+  padding:6px 14px;border-radius:100px;margin-bottom:24px}
+.hero h1{font-size:clamp(36px,8vw,68px);font-weight:800;line-height:1.05;letter-spacing:-2px;
+  margin-bottom:18px;max-width:760px}
+.hero h1 em{font-style:normal;color:var(--accent2)}
+.hero p{font-size:clamp(15px,2.5vw,19px);color:var(--muted);max-width:480px;line-height:1.65;margin-bottom:32px}
+.btn-main{background:var(--accent);color:#fff;padding:15px 36px;border-radius:14px;
+  font-size:16px;font-weight:700;box-shadow:0 8px 28px rgba(124,58,237,.35);transition:all .2s}
+.btn-main:hover{opacity:.88;transform:translateY(-1px)}
+.hero-social{color:var(--muted);font-size:13px;margin-top:12px}
+.lsec{max-width:960px;margin:0 auto;padding:64px 20px}
+.lsec-label{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.lsec h2{font-size:clamp(26px,4.5vw,40px);font-weight:800;letter-spacing:-1px;margin-bottom:40px}
+.cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.lcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px}
+.lcard-icon{font-size:30px;margin-bottom:14px}
+.lcard h3{font-size:17px;font-weight:700;margin-bottom:7px}
+.lcard p{color:var(--muted);font-size:13px;line-height:1.6}
+.steps-list{display:flex;flex-direction:column}
+.step{display:flex;gap:18px;align-items:flex-start;padding:22px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border:none}
+.step-n{width:38px;height:38px;min-width:38px;background:var(--accent);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff}
+.step-body h3{font-size:17px;font-weight:700;margin-bottom:5px}
+.step-body p{color:var(--muted);font-size:13px;line-height:1.6}
+.cta-block{text-align:center;padding:72px 20px}
+.cta-block h2{font-size:clamp(26px,4.5vw,40px);font-weight:800;letter-spacing:-1px;margin-bottom:10px}
+.cta-block p{color:var(--muted);margin-bottom:28px}
+footer{border-top:1px solid var(--border);padding:20px;display:flex;justify-content:space-between;align-items:center}
+footer .flogo{font-size:15px;font-weight:800}
+footer .flogo span{color:var(--accent)}
+footer .fsub{color:var(--muted);font-size:12px}
+
+/* REGISTRATION */
+#screen-reg{background:var(--black);display:flex;align-items:center;justify-content:center;padding:24px}
+.reg-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:32px 28px;width:100%;max-width:400px}
+.reg-card h2{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:5px}
+.reg-card .sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:7px;letter-spacing:.4px}
+.field input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:11px;
+  padding:12px 15px;font-size:15px;color:var(--text);transition:border-color .2s}
+.field input:focus{border-color:var(--accent)}
+.field input::placeholder{color:var(--muted)}
+.gender-row{display:flex;gap:10px}
+.gbtn{flex:1;padding:12px;border-radius:11px;background:var(--surface);border:1.5px solid var(--border);
+  color:var(--text);font-size:14px;font-weight:500;transition:all .2s}
+.gbtn.active{background:rgba(124,58,237,.13);border-color:var(--accent);color:var(--accent);font-weight:700}
+.btn-submit{width:100%;background:var(--accent);color:#fff;padding:14px;border-radius:11px;
+  font-size:15px;font-weight:700;margin-top:6px;transition:opacity .2s}
+.btn-submit:disabled{opacity:.45;cursor:not-allowed}
+.btn-back{width:100%;color:var(--muted);font-size:13px;padding:10px;margin-top:10px;text-align:center}
+.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;
+  border-radius:9px;padding:11px 13px;font-size:13px;margin-bottom:14px;display:none}
+
+/* ONBOARDING */
+#screen-ob{background:var(--black);min-height:100vh;display:flex;flex-direction:column}
+.ob-intro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px;text-align:center}
+.ob-intro-icon{font-size:56px;margin-bottom:20px;line-height:1}
+.ob-intro-title{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:16px;max-width:320px}
+.ob-intro-card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:20px 22px;margin-bottom:28px;text-align:left;max-width:380px;width:100%}
+.ob-intro-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ob-intro-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;color:var(--text)}
+.ob-intro-list li span:first-child{font-size:18px;flex-shrink:0;margin-top:-1px}
+.ob-intro-time{color:var(--muted);font-size:13px;margin-bottom:24px}
+.ob-q-wrap{flex:1;display:flex;flex-direction:column;padding:0 0 24px}
+.ob-topbar{padding:16px 24px 0;display:flex;align-items:center;gap:14px}
+.ob-back-btn{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
+.ob-progress-wrap{flex:1}
+.ob-progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.ob-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .45s cubic-bezier(.4,0,.2,1)}
+.ob-progress-label{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px;letter-spacing:.4px}
+.ob-q-body{padding:28px 24px 0;flex:1;display:flex;flex-direction:column}
+.ob-q-title{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;line-height:1.25}
+.ob-q-hint{font-style:italic;font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.55}
+.ob-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:auto}
+.ob-card{background:var(--card);border:2px solid var(--border);border-radius:16px;
+  padding:16px 18px;text-align:left;color:var(--text);cursor:pointer;
+  transition:border-color .18s,background .18s,transform .1s;display:flex;align-items:center;gap:14px}
+.ob-card:active{transform:scale(.985)}
+.ob-card.sel{background:rgba(124,58,237,.1);border-color:var(--accent)}
+.ob-card-emoji{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.ob-card-text{flex:1}
+.ob-card-main{font-size:15px;font-weight:700;margin-bottom:2px;color:var(--text)}
+.ob-card.sel .ob-card-main{color:var(--accent)}
+.ob-card-sub{font-size:12px;color:var(--muted);line-height:1.4}
+.ob-card-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .18s}
+.ob-card.sel .ob-card-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.ob-btn-row{padding:20px 24px 0}
+.ob-next{background:var(--accent);color:#fff;padding:15px;border-radius:13px;
+  font-size:15px;font-weight:700;width:100%;transition:opacity .2s,transform .1s;
+  box-shadow:0 6px 20px rgba(124,58,237,.28)}
+.ob-next:not(:disabled):active{transform:scale(.97)}
+.ob-next:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.ob-result-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:20px 24px 32px}
+.ob-result-wrap::-webkit-scrollbar{display:none}
+.ob-result-hero{text-align:center;padding:8px 0 20px}
+.ob-result-emoji{font-size:72px;margin-bottom:12px;line-height:1}
+.ob-result-type-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.ob-result-name{font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.ob-result-desc{font-size:14px;color:var(--muted);line-height:1.6;max-width:300px;margin:0 auto 20px}
+.ob-bonuses{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-bottom:20px}
+.ob-bonuses-title{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.ob-bonus-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ob-bonus-row:last-child{border:none;padding-bottom:0}
+.ob-bonus-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.ob-bonus-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.ob-bonus-val{font-size:15px;font-weight:700;color:var(--text)}
+
+/* PHONE GAME */
+#screen-game{background:var(--black);min-height:100vh}
+@media(min-width:768px){
+  #screen-game{
+    background:radial-gradient(ellipse 80% 60% at 30% 50%,#1a0533 0%,#090912 60%),
+               linear-gradient(135deg,#0d0d1a 0%,#0a0a0f 100%);
+    display:flex;align-items:flex-start;justify-content:center;padding:24px 0 32px}
+  .phone-frame{
+    width:393px;height:852px;
+    background:linear-gradient(160deg,#2a2a2a 0%,#1a1a1a 100%);
+    border-radius:52px;padding:11px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.08),0 40px 120px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.04);
+    position:relative;flex-shrink:0}
+  .phone-frame::after{
+    content:'';position:absolute;
+    right:-3px;top:140px;width:3px;height:72px;
+    background:linear-gradient(180deg,#2a2a2a,#1a1a1a);border-radius:0 2px 2px 0;
+    box-shadow:0 80px 0 0 #1a1a1a,0 88px 0 0 #1a1a1a,0 -60px 0 0 #1a1a1a}
+  .phone-frame::before{
+    content:'';position:absolute;
+    top:11px;left:50%;transform:translateX(-50%);
+    width:120px;height:34px;background:#0a0a0a;border-radius:0 0 24px 24px;z-index:30;
+    box-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .phone-screen{width:100%;height:100%;background:#0d1b3e;border-radius:43px;overflow:hidden;
+    display:flex;flex-direction:column;position:relative}
+}
+@media(max-width:767px){
+  #screen-game{min-height:100vh;display:flex}
+  .phone-frame{width:100%;flex:1;display:flex;flex-direction:column}
+  .phone-frame::before,.phone-frame::after{display:none}
+  .phone-screen{flex:1;background:#0d1b3e;display:flex;flex-direction:column;overflow:hidden;position:relative}
+}
+
+/* STATUS BAR */
+.status-bar{
+  height:44px;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 24px 6px;position:absolute;top:0;left:0;right:0;z-index:25;pointer-events:none;color:#fff}
+.sb-time{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.sb-notch{width:120px;height:20px;flex-shrink:0}
+.sb-icons{display:flex;align-items:center;gap:6px}
+.sig-bars{display:flex;align-items:flex-end;gap:1.5px;height:11px}
+.sig-bar{width:3px;border-radius:1px;background:currentColor}
+.sig-bar:nth-child(1){height:4px}
+.sig-bar:nth-child(2){height:6px}
+.sig-bar:nth-child(3){height:9px}
+.sig-bar:nth-child(4){height:11px;opacity:.35}
+.batt{display:flex;align-items:center;gap:3px}
+.batt-body{width:22px;height:11px;border-radius:2.5px;border:1.5px solid currentColor;position:relative}
+.batt-fill{position:absolute;left:1.5px;top:1.5px;bottom:1.5px;border-radius:1px;background:var(--pgreen);width:75%}
+.batt-tip{width:2px;height:5px;border-radius:0 1px 1px 0;background:currentColor;opacity:.45;margin-left:-1px}
+.batt-pct{font-size:11px;font-weight:600;letter-spacing:-.2px}
+
+/* APP LAYER */
+.app-layer{
+  position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
+  background:#f5f5f7;
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.app-layer.open{transform:translateY(0);pointer-events:auto}
+.app-hdr{
+  flex-shrink:0;padding:52px 16px 10px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(0,0,0,.07);background:#fff}
+.app-hdr-back{display:flex;align-items:center;gap:2px;color:var(--pblue);font-size:15px;font-weight:600;
+  background:none;border:none;cursor:pointer;padding:0}
+.app-hdr-back svg{width:10px;height:18px;stroke:var(--pblue);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.app-hdr-title{font-size:17px;font-weight:700;color:var(--pt);margin-left:4px}
+.app-hdr-badge{margin-left:auto;background:var(--pred);color:#fff;font-size:11px;font-weight:800;
+  padding:2px 7px;border-radius:100px;display:none}
+.app-hdr-badge.show{display:inline-block}
+.app-body{flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f7}
+.app-body::-webkit-scrollbar{display:none}
+
+/* HOME SCREEN */
+.home-screen{flex:1;overflow:hidden;position:relative;
+  background:linear-gradient(160deg,#1c1033 0%,#0d1b3e 50%,#0a1628 100%)}
+.home-scroll{overflow-y:auto;height:100%;padding-bottom:120px}
+.home-scroll::-webkit-scrollbar{display:none}
+.home-wallpaper-blur{position:absolute;inset:0;
+  background:radial-gradient(circle 160px at 80% 20%,rgba(124,58,237,.35) 0%,transparent 70%),
+             radial-gradient(circle 200px at 10% 70%,rgba(6,214,160,.18) 0%,transparent 70%);pointer-events:none}
+.home-clock-wrap{padding:48px 0 8px;text-align:center;position:relative;z-index:2}
+.home-clock{font-size:72px;font-weight:200;color:#fff;letter-spacing:-3px;line-height:1;text-shadow:0 2px 24px rgba(0,0,0,.3)}
+.home-date-str{font-size:16px;font-weight:400;color:rgba(255,255,255,.7);margin-top:4px;letter-spacing:.2px}
+.home-widget{margin:16px 16px 0;background:rgba(255,255,255,.1);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:14px 16px;position:relative;z-index:2}
+.hw-greeting{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:3px}
+.hw-msg{font-size:15px;font-weight:700;color:#fff;line-height:1.4}
+.hw-action{margin-top:10px;display:none;align-items:center;gap:6px;
+  background:rgba(124,58,237,.5);border:1px solid rgba(124,58,237,.6);
+  color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px;cursor:pointer;
+  width:fit-content}
+.app-grid-wrap{margin:20px 16px 0;display:grid;grid-template-columns:repeat(3,1fr);
+  gap:20px 12px;position:relative;z-index:2}
+.app-ico{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app-ico-box{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:30px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.12);
+  transition:transform .12s ease}
+.app-ico:active .app-ico-box{transform:scale(.88)}
+.app-ico-label{font-size:11px;color:rgba(255,255,255,.9);font-weight:500;text-align:center;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);white-space:nowrap}
+.app-badge{position:absolute;top:-5px;right:-5px;background:var(--pred);color:#fff;
+  font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid rgba(28,16,51,.8)}
+.home-dock{position:absolute;bottom:0;left:0;right:0;padding:10px 24px 20px;
+  background:rgba(255,255,255,.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.dock-ico{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dock-ico-box{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;box-shadow:0 3px 10px rgba(0,0,0,.3);transition:transform .12s ease;position:relative}
+.dock-ico:active .dock-ico-box{transform:scale(.88)}
+.dock-ico-label{font-size:10px;color:rgba(255,255,255,.8);font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.dock-badge{position:absolute;top:-4px;right:-4px;background:var(--pred);color:#fff;font-size:9px;font-weight:800;
+  min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  padding:0 3px;border:2px solid rgba(28,16,51,.8)}
+
+/* STAT BAR inside apps */
+.g-stat-bar{flex-shrink:0;background:#fff;border-bottom:1px solid var(--pborder);padding:6px 14px 8px;display:flex;gap:8px;align-items:center}
+.gstat{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px}
+.gstat.money{background:#e8fdf0;color:#1a7a3c}
+.gstat.streak{background:#fff4e6;color:#c05c00}
+.gstat.xp{background:#f0ebff;color:#5b21b6}
+
+/* TAB PANELS */
+.tab-panel{display:block;flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f7}
+.tab-panel::-webkit-scrollbar{display:none}
+.ph-head{padding:14px 16px 8px;font-size:22px;font-weight:800;color:var(--pt);letter-spacing:-.5px}
+.ph-sub{padding:0 16px 12px;font-size:13px;color:var(--pmuted)}
+
+/* DMs */
+.dm-list{display:flex;flex-direction:column}
+.dm-item{display:flex;gap:11px;align-items:center;padding:12px 15px;
+  border-bottom:1px solid #f2f2f2;cursor:pointer;background:#fff;transition:background .1s}
+.dm-item:active{background:#f0f0f0}
+.dm-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.dm-right{flex:1;min-width:0}
+.dm-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.dm-name{font-size:15px;font-weight:700;color:var(--pt)}
+.dm-time{font-size:11px;color:var(--pmuted)}
+.dm-preview{font-size:13px;color:var(--pmuted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.dm-dot{width:9px;height:9px;background:var(--pblue);border-radius:50%;flex-shrink:0}
+.dm-red{color:var(--pred)!important}
+/* chat */
+.chat-win{display:flex;flex-direction:column;height:100%}
+.chat-hdr{background:#fff;padding:12px 15px 10px;border-bottom:1px solid var(--pborder);display:flex;align-items:center;gap:11px;flex-shrink:0}
+.chat-back{font-size:26px;color:var(--pblue);background:none;border:none;cursor:pointer;padding:0;line-height:1}
+.chat-hdr-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+.chat-hdr-name{font-size:15px;font-weight:700;color:var(--pt)}
+.chat-hdr-status{font-size:11px;color:var(--pmuted)}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.chat-msgs::-webkit-scrollbar{display:none}
+.brow{display:flex}
+.brow.them{justify-content:flex-start}
+.brow.me{justify-content:flex-end}
+.brow.sys{justify-content:center}
+.bubble{max-width:76%;padding:9px 13px;border-radius:18px;font-size:14px;line-height:1.45}
+.bubble.them{background:#e9e9eb;color:var(--pt);border-bottom-left-radius:4px}
+.bubble.me{background:var(--pblue);color:#fff;border-bottom-right-radius:4px}
+.bubble.scam{background:#ffe5e5;color:#c00}
+.bubble.sys{background:rgba(0,0,0,.06);color:var(--pmuted);text-align:center;font-size:12px;border-radius:9px;max-width:88%}
+.chat-choices{padding:10px 14px 18px;display:flex;flex-direction:column;gap:7px;background:rgba(248,248,248,.97);border-top:1px solid var(--pborder);flex-shrink:0}
+.cchoice{background:#fff;border:1.5px solid var(--pborder);border-radius:13px;padding:11px 14px;text-align:left;font-size:13px;font-weight:500;color:var(--pt);transition:all .15s}
+.cchoice:active{background:#f0f0f0}
+.cchoice.chosen{background:var(--pblue);color:#fff;border-color:var(--pblue)}
+.chat-result{padding:12px 14px 18px;background:#f8f8f8;border-top:1px solid var(--pborder);text-align:center;flex-shrink:0}
+.result-badge{display:inline-flex;align-items:center;gap:7px;background:#fff;border-radius:50px;padding:8px 18px;font-size:13px;font-weight:700;border:1.5px solid var(--pborder)}
+.btn-blue{background:var(--pblue);color:#fff;border:none;border-radius:11px;padding:11px 24px;font-size:14px;font-weight:700;cursor:pointer}
+
+/* WALLET */
+.wallet-hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);margin:12px;border-radius:18px;padding:26px 22px;text-align:center}
+.w-label{font-size:12px;color:rgba(255,255,255,.55);margin-bottom:5px}
+.w-amount{font-size:42px;font-weight:800;color:#fff;letter-spacing:-2px;margin-bottom:3px}
+.w-sub{font-size:12px;color:rgba(255,255,255,.45)}
+.w-actions{display:flex;gap:9px;margin:14px}
+.w-act{flex:1;background:#fff;border-radius:13px;padding:13px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;border:1.5px solid var(--pborder);transition:all .15s}
+.w-act:active{transform:scale(.97)}
+.w-act-icon{font-size:20px}
+.w-act-label{font-size:11px;font-weight:700;color:var(--pt)}
+.tx-section{padding:0 14px}
+.tx-sec-title{font-size:11px;font-weight:800;color:var(--pmuted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.tx-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f2f2f2}
+.tx-left{display:flex;gap:11px;align-items:center}
+.tx-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+.tx-desc{font-size:13px;font-weight:600;color:var(--pt)}
+.tx-date{font-size:11px;color:var(--pmuted)}
+.tx-amount{font-size:14px;font-weight:800}
+.tx-pos{color:var(--pgreen)}
+.tx-neg{color:var(--pred)}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:49;display:none}
+.invest-modal{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:22px 22px 0 0;
+  padding:22px;z-index:50;box-shadow:0 -4px 40px rgba(0,0,0,.14);display:none}
+.invest-modal h3{font-size:19px;font-weight:800;margin-bottom:7px}
+.invest-modal .im-sub{color:var(--pmuted);font-size:13px;margin-bottom:16px}
+.invest-opts{display:flex;flex-direction:column;gap:9px}
+.inv-opt{background:#f8f8f8;border:1.5px solid var(--pborder);border-radius:13px;padding:13px 16px;
+  display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s}
+.inv-opt:active{background:#efefef}
+.inv-left{font-weight:700;color:var(--pt);font-size:14px}
+.inv-right{color:var(--pmuted);font-size:12px}
+.inv-cancel{width:100%;background:#f0f0f0;border-radius:11px;padding:12px;color:var(--pt);font-weight:700;font-size:14px;margin-top:10px;cursor:pointer;border:none}
+
+/* QUESTS */
+.quest-section{padding:14px}
+.qs-title{font-size:11px;font-weight:800;color:var(--pmuted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.dq-item{background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.dq-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--pborder);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;transition:all .2s}
+.dq-check.done{background:var(--pgreen);border-color:var(--pgreen);color:#fff}
+.dq-body{flex:1}
+.dq-title{font-size:13px;font-weight:700;color:var(--pt)}
+.dq-reward{font-size:11px;color:var(--pmuted);margin-top:2px}
+.dq-prog{width:52px}
+.dq-prog-bar{height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden}
+.dq-prog-fill{height:100%;background:var(--pgreen);border-radius:2px}
+.mission-item{background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.mission-item.locked{opacity:.5}
+.m-num{width:34px;height:34px;border-radius:9px;background:var(--pblue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.m-num.locked{background:#e0e0e0;color:var(--pmuted)}
+.m-num.done{background:var(--pgreen)}
+.m-body{flex:1}
+.m-title{font-size:13px;font-weight:700;color:var(--pt)}
+.m-sub{font-size:11px;color:var(--pmuted);margin-top:2px}
+.m-arrow{color:var(--pmuted);font-size:15px}
+
+/* STATS */
+.stats-hero{margin:14px;background:linear-gradient(135deg,rgba(124,58,237,.13) 0%,rgba(6,214,160,.07) 100%);
+  border:1px solid rgba(124,58,237,.18);border-radius:18px;padding:18px}
+.sh-type{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.sh-name{font-size:20px;font-weight:800;color:var(--pt);margin-bottom:12px}
+.xp-bar-top{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:5px}
+.xp-bar-out{height:7px;background:rgba(124,58,237,.14);border-radius:4px;overflow:hidden}
+.xp-bar-in{height:100%;background:var(--accent);border-radius:4px;transition:width .5s}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 14px 12px}
+.stat-card{background:#fff;border-radius:14px;padding:13px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-card-label{font-size:10px;font-weight:800;color:var(--pmuted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.stat-card-val{font-size:24px;font-weight:800;color:var(--pt)}
+.stat-card-unit{font-size:12px;font-weight:400;color:var(--pmuted);margin-left:2px}
+.skills-sec{margin:0 14px 12px}
+.skill-row{background:#fff;border-radius:13px;padding:13px 14px;margin-bottom:7px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.skill-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.skill-name{font-size:13px;font-weight:700;color:var(--pt)}
+.skill-lvl{font-size:11px;color:var(--pmuted)}
+.skill-bar-out{height:5px;background:#f0f0f0;border-radius:3px;overflow:hidden}
+.skill-bar-in{height:100%;border-radius:3px;transition:width .5s}
+.badges-sec{margin:0 14px 12px}
+.badges-wrap{display:flex;flex-wrap:wrap;gap:9px}
+.badge-item{background:#fff;border-radius:13px;padding:9px 13px;display:flex;align-items:center;gap:7px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.badge-icon{font-size:18px}
+.badge-name{font-size:12px;font-weight:700;color:var(--pt)}
+.debug-btn{display:block;margin:0 14px 10px;background:#f0f0f0;border:none;border-radius:11px;
+  padding:11px;font-size:12px;font-weight:700;color:var(--pmuted);cursor:pointer;text-align:center;width:calc(100% - 28px)}
+.debug-btn:active{background:#e0e0e0}
+
+/* TOAST */
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:#1a1a2e;color:#fff;padding:12px 22px;border-radius:13px;font-size:14px;font-weight:700;
+  z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* DEV RESET */
+#dev-reset-btn{position:fixed;bottom:16px;left:16px;z-index:99999;background:rgba(20,20,30,.82);
+  backdrop-filter:blur(8px);color:rgba(255,255,255,.55);font-size:11px;font-weight:700;
+  padding:7px 12px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.12);
+  letter-spacing:.3px;transition:all .2s;user-select:none}
+#dev-reset-btn:hover{color:#ff6b6b;border-color:rgba(255,107,107,.4);background:rgba(20,20,30,.95)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fadeup{animation:fadeUp .3s ease both}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <nav class="nav">
+    <div class="logo">HUSTLE<span>.</span>OS</div>
+    <button class="nav-cta" onclick="showScreen('reg')">Начать</button>
+  </nav>
+  <section class="hero">
+    <div class="hero-pill">&#x1F680; Для подростков</div>
+    <h1>Преврати хобби<br/>в <em>первый доход</em></h1>
+    <p>Интерактивный квест по предпринимательству. Учись через реальные ситуации — клиенты, переговоры, скамы.</p>
+    <button class="btn-main" onclick="showScreen('reg')">Начать бесплатно →</button>
+    <div class="hero-social">Уже играют: 127 учеников</div>
+  </section>
+  <div class="lsec">
+    <div class="lsec-label">Проблема</div>
+    <h2>Школа не готовит к реальным деньгам</h2>
+    <div class="cards3">
+      <div class="lcard"><div class="lcard-icon">&#x1F393;</div><h3>Учёба без практики</h3><p>Школа даёт теорию, но не объясняет как зарабатывать первые 10,000₸ уже сейчас.</p></div>
+      <div class="lcard"><div class="lcard-icon">&#x1F4B8;</div><h3>Скамы и ловушки</h3><p>Подростки теряют деньги на "лёгком заработке". Никто не учит распознавать развод.</p></div>
+      <div class="lcard"><div class="lcard-icon">&#x1F914;</div><h3>Хобби без монетизации</h3><p>Рисуешь, снимаешь видео, разбираешься в трендах — но не знаешь как превратить это в деньги.</p></div>
+    </div>
+  </div>
+  <div class="lsec" style="padding-top:0">
+    <div class="lsec-label">Решение</div>
+    <h2>Учись через игру, зарабатывай в реальности</h2>
+    <div class="cards3">
+      <div class="lcard"><div class="lcard-icon">&#x1F3AF;</div><h3>Найди свой путь</h3><p>Тест из 4 шагов определяет твой Founder Type — дизайнер, контент-мейкер, трейдер и другие.</p></div>
+      <div class="lcard"><div class="lcard-icon">&#x1F4BC;</div><h3>Реальные кейсы</h3><p>Отвечай на сообщения клиентов, веди переговоры, принимай решения с реальными последствиями.</p></div>
+      <div class="lcard"><div class="lcard-icon">&#x1F6E1;&#xFE0F;</div><h3>Скамы в безопасной среде</h3><p>Практикуйся распознавать мошенников без риска потерять настоящие деньги.</p></div>
+      <div class="lcard"><div class="lcard-icon">&#x1F680;</div><h3>План на 30 дней</h3><p>Пройди 8 миссий и получи персональный план запуска своего первого проекта.</p></div>
+    </div>
+  </div>
+  <div class="lsec" style="padding-top:0">
+    <div class="lsec-label">Как это работает</div>
+    <h2>Три шага до первого дохода</h2>
+    <div class="steps-list">
+      <div class="step"><div class="step-n">1</div><div class="step-body"><h3>Зарегистрируйся за минуту</h3><p>Только имя и email — никаких лишних данных.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-body"><h3>Узнай свой тип фаундера</h3><p>Тест на основе интересов и навыков определит идеальный путь.</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-body"><h3>Играй каждый день</h3><p>Отвечай на сообщения, зарабатывай, прокачивай скиллы.</p></div></div>
+    </div>
+  </div>
+  <div class="cta-block">
+    <h2>Готов начать?</h2>
+    <p>Бесплатно. Без рекламы. Сделано с душой.</p>
+    <button class="btn-main" onclick="showScreen('reg')">Создать аккаунт →</button>
+  </div>
+  <footer>
+    <div class="flogo">HUSTLE<span>.</span>OS</div>
+    <div class="fsub">Passion project 2025</div>
+  </footer>
+</div>
+
+<!-- REGISTRATION -->
+<div id="screen-reg" class="screen" style="min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px">
+  <div class="reg-card fadeup">
+    <h2>Создай аккаунт</h2>
+    <p class="sub">Одна минута — и ты в игре</p>
+    <div id="reg-err" class="err"></div>
+    <div class="field"><label>ИМЯ</label><input id="reg-name" type="text" placeholder="Как тебя зовут?" maxlength="40"/></div>
+    <div class="field"><label>EMAIL</label><input id="reg-email" type="email" placeholder="твой@email.com"/></div>
+    <div class="field">
+      <label>ПОЛ</label>
+      <div class="gender-row">
+        <button class="gbtn" id="gbtn-male" onclick="selectGender('male')">&#x1F466; Парень</button>
+        <button class="gbtn" id="gbtn-female" onclick="selectGender('female')">&#x1F467; Девушка</button>
+      </div>
+    </div>
+    <button class="btn-submit" id="reg-submit" onclick="handleRegister()">Зарегистрироваться →</button>
+    <button class="btn-back" onclick="showScreen('landing')">← Назад</button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="screen-ob" class="screen fadeup" style="display:none">
+  <div id="ob-intro" class="ob-intro" style="display:none">
+    <div class="ob-intro-icon">&#x1F3AF;</div>
+    <div class="ob-intro-title">Соберём твой профиль основателя</div>
+    <div class="ob-intro-card">
+      <ul class="ob-intro-list">
+        <li><span>&#x1F9EC;</span><span>Определим твой тип — Hustler, Creator, Strategist или Connector</span></li>
+        <li><span>&#x1F4B0;</span><span>Выдадим стартовый капитал под твой стиль</span></li>
+        <li><span>&#x1F3AF;</span><span>Подберём первые квесты именно для тебя</span></li>
+      </ul>
+    </div>
+    <div class="ob-intro-time">&#x23F1; Займёт 30 секунд</div>
+    <button class="btn-main" onclick="obGoToQuestion(1)">Начать →</button>
+  </div>
+  <div id="ob-q-screen" class="ob-q-wrap" style="display:none">
+    <div class="ob-topbar">
+      <button class="ob-back-btn" onclick="obGoBack()">&#x2039;</button>
+      <div class="ob-progress-wrap">
+        <div class="ob-progress-track"><div class="ob-fill" id="ob-fill" style="width:25%"></div></div>
+        <div class="ob-progress-label" id="ob-prog-label">1 из 4</div>
+      </div>
+    </div>
+    <div class="ob-q-body" id="ob-q-body"></div>
+    <div class="ob-btn-row">
+      <button class="ob-next" id="ob-next-btn" onclick="obNext()" disabled>Дальше →</button>
+    </div>
+  </div>
+  <div id="ob-result-screen" class="ob-result-wrap" style="display:none">
+    <div id="ob-result-content"></div>
+    <button class="ob-next" onclick="finishOnboarding()" style="margin-top:20px">Начать игру &#x1F680;</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen" style="display:none">
+  <div class="phone-frame">
+    <div class="phone-screen">
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+        <span class="sb-time" id="sb-time">9:41</span>
+        <span class="sb-notch"></span>
+        <span class="sb-icons">
+          <span style="display:flex;align-items:flex-end;gap:1.5px;height:11px">
+            <span style="width:3px;height:4px;border-radius:1px;background:currentColor"></span>
+            <span style="width:3px;height:6px;border-radius:1px;background:currentColor"></span>
+            <span style="width:3px;height:9px;border-radius:1px;background:currentColor"></span>
+            <span style="width:3px;height:11px;border-radius:1px;background:currentColor;opacity:.35"></span>
+          </span>
+          <span style="font-size:13px;line-height:1">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="vertical-align:middle">
+              <path d="M8 11.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" fill="white"/>
+              <path d="M3.5 7.5C4.9 6.1 6.35 5.4 8 5.4c1.65 0 3.1.7 4.5 2.1" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <path d="M1 4.5C3 2.6 5.4 1.5 8 1.5s5 1.1 7 3" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".5"/>
+            </svg>
+          </span>
+          <span class="batt">
+            <span class="batt-body"><span class="batt-fill"></span></span>
+            <span class="batt-tip"></span>
+            <span class="batt-pct">87%</span>
+          </span>
+        </span>
+      </div>
+      <!-- HOME SCREEN -->
+      <div class="home-screen" id="home-screen">
+        <div class="home-wallpaper-blur"></div>
+        <div class="home-scroll" id="home-scroll">
+          <div class="home-clock-wrap">
+            <div class="home-clock" id="home-clock">9:41</div>
+            <div class="home-date-str" id="home-date-str">загрузка...</div>
+          </div>
+          <div class="home-widget">
+            <div class="hw-greeting" id="hw-greeting">Добро пожаловать!</div>
+            <div class="hw-msg" id="hw-msg">HUSTLE.OS</div>
+            <div class="hw-action" id="hw-action" onclick="openApp('dms')">&#x1F4AC; Читать сообщения</div>
+          </div>
+          <div class="app-grid-wrap" id="home-app-grid"></div>
+          <div style="height:140px"></div>
+        </div>
+        <div class="home-dock" id="home-dock"></div>
+      </div>
+      <!-- APP: Messages -->
+      <div class="app-layer" id="app-dms">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Сообщения</span>
+          <span class="app-hdr-badge" id="dms-badge">0</span>
+        </div>
+        <div class="app-body" id="tab-dms" style="background:#fff"></div>
+      </div>
+      <!-- APP: Wallet -->
+      <div class="app-layer" id="app-wallet" style="flex-direction:column">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Кошелёк</span>
+        </div>
+        <div class="g-stat-bar">
+          <span class="gstat money" id="g-money">&#x1F4B0; 0&#x20B8;</span>
+          <span class="gstat streak" id="g-streak">&#x1F525; 0 дн</span>
+          <span class="gstat xp" id="g-xp">&#x2B50; 0 XP</span>
+        </div>
+        <div class="app-body" id="tab-wallet" style="flex:1"></div>
+      </div>
+      <!-- APP: Quests -->
+      <div class="app-layer" id="app-quests">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Квесты</span>
+        </div>
+        <div class="app-body" id="tab-quests"></div>
+      </div>
+      <!-- APP: Profile/Stats -->
+      <div class="app-layer" id="app-stats">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Профиль</span>
+        </div>
+        <div class="app-body" id="tab-stats"></div>
+      </div>
+      <!-- APP: Market -->
+      <div class="app-layer" id="app-market">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Маркет</span>
+        </div>
+        <div class="app-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center">
+          <div style="font-size:56px;margin-bottom:16px">&#x1F6D2;</div>
+          <div style="font-size:20px;font-weight:800;color:var(--pt);margin-bottom:8px">Маркет</div>
+          <div style="font-size:14px;color:var(--pmuted)">Скоро — инструменты, курсы и биржа заказов</div>
+        </div>
+      </div>
+      <!-- APP: Settings -->
+      <div class="app-layer" id="app-settings">
+        <div class="app-hdr">
+          <button class="app-hdr-back" onclick="closeApp()">
+            <svg viewBox="0 0 10 18"><polyline points="9,1 1,9 9,17"/></svg>
+            Назад
+          </button>
+          <span class="app-hdr-title">Настройки</span>
+        </div>
+        <div class="app-body" style="padding:16px">
+          <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <div style="padding:14px 16px;border-bottom:1px solid #f2f2f2;font-size:14px;font-weight:600;color:var(--pt)">&#x1F464; Имя: <span id="settings-name">—</span></div>
+            <div style="padding:14px 16px;border-bottom:1px solid #f2f2f2;font-size:14px;font-weight:600;color:var(--pt)">&#x1F4E7; Email: <span id="settings-email" style="color:var(--pmuted)">—</span></div>
+            <div style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--pred);cursor:pointer" onclick="resetProgress()">&#x1F5D1;&#xFE0F; Сбросить прогресс (Dev Reset)</div>
+          </div>
+          <button onclick="testSupabase()" style="margin-top:12px;width:100%;background:#f0f0f0;border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:700;color:var(--pmuted);cursor:pointer">&#x1F527; Test Supabase</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<!-- DEV RESET -->
+<div id="dev-reset-btn" onclick="resetProgress()" title="Dev Reset">&#x1F5D1;&#xFE0F; Reset</div>
+<!-- INVEST OVERLAY -->
+<div class="modal-overlay" id="invest-overlay" onclick="closeInvest()"></div>
+<div class="invest-modal" id="invest-modal">
+  <h3>&#x1F4E3; Вложить в рекламу</h3>
+  <div class="im-sub">Шанс 60% удвоить вложения. Риск потерять всё.</div>
+  <div class="invest-opts">
+    <div class="inv-opt" onclick="doInvest(500,'Мини-кампания')"><div class="inv-left">Мини-кампания</div><div class="inv-right">500₸ → 1,000₸</div></div>
+    <div class="inv-opt" onclick="doInvest(2000,'Стандарт')"><div class="inv-left">Стандарт</div><div class="inv-right">2,000₸ → 4,000₸</div></div>
+    <div class="inv-opt" onclick="doInvest(5000,'Полный запуск')"><div class="inv-left">Полный запуск</div><div class="inv-right">5,000₸ → 10,000₸</div></div>
+  </div>
+  <button class="inv-cancel" onclick="closeInvest()">Отмена</button>
+</div>
+
+<script>
+// ============================================================
+// SUPABASE
+// ============================================================
+var SUPABASE_URL = 'https://bfibrqzitnokpbuoaajv.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmaWJycXppdG5va3BidW9hYWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDkzOTksImV4cCI6MjA5Nzk4NTM5OX0.epR-7zqS67cj6j4_8rdJTHvDziNEOn6MvzLqbeOdHkE';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function registerUser(name, email, gender) {
+  try {
+    var res = await sb.from('users')
+      .insert([{ name: name, email: email, gender: gender, total_xp: 0, total_money: 0, streak_days: 0, blueprint_progress: 0 }])
+      .select();
+    if (res.error) { showErr('reg-err', 'Ошибка: ' + res.error.message); return null; }
+    var user = res.data[0];
+    localStorage.setItem('user_id', user.id);
+    localStorage.setItem('user_name', name);
+    localStorage.setItem('user_email', email);
+    localStorage.setItem('user_gender', gender);
+    return user;
+  } catch(e) { showErr('reg-err', 'Ошибка подключения: ' + e.message); return null; }
+}
+
+async function testSupabase() {
+  try {
+    var res = await sb.from('users').select('*', { count: 'exact', head: true });
+    if (res.error) throw res.error;
+    showToast('Supabase OK! Пользователей: ' + res.count);
+  } catch(e) { showToast('Ошибка: ' + e.message); }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+var state = {
+  money: 0, xp: 0, streak: 0, day: 1,
+  completedDialogs: {},
+  transactions: [],
+  dailyQuests: { q1: false, q2: false, q3: false },
+  skills: { sales: 10, design: 5, marketing: 8, negotiation: 3, analytics: 2 },
+  badges: []
+};
+function loadState() {
+  try { var s = localStorage.getItem('game_state'); if (s) state = JSON.parse(s); } catch(e) {}
+}
+function saveState() { localStorage.setItem('game_state', JSON.stringify(state)); }
+function getLevel(xp) { return Math.floor(xp / 200) + 1; }
+function getXpProg(xp) { return xp % 200; }
+function fmtMoney(n) { return (n || 0).toLocaleString('ru') + '\u20B8'; }
+
+// ============================================================
+// SCREEN NAVIGATION
+// ============================================================
+function showScreen(id) {
+  var screens = ['landing', 'reg', 'ob', 'game'];
+  screens.forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (!el) return;
+    if (s === id) {
+      el.style.display = (s === 'reg') ? 'flex' : (s === 'ob' || s === 'game') ? 'flex' : 'block';
+      if (s === 'ob') el.style.flexDirection = 'column';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+  if (id === 'game') initGame();
+}
+
+// ============================================================
+// REGISTRATION
+// ============================================================
+var selectedGender = '';
+function selectGender(g) {
+  selectedGender = g;
+  document.getElementById('gbtn-male').classList.toggle('active', g === 'male');
+  document.getElementById('gbtn-female').classList.toggle('active', g === 'female');
+}
+function showErr(id, msg) { var el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+
+async function handleRegister() {
+  hideErr('reg-err');
+  var name = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim().toLowerCase();
+  if (name.length < 2) { showErr('reg-err', 'Имя должно быть минимум 2 символа'); return; }
+  if (!email.includes('@') || !email.includes('.')) { showErr('reg-err', 'Введи корректный email'); return; }
+  if (!selectedGender) { showErr('reg-err', 'Выбери пол'); return; }
+  var btn = document.getElementById('reg-submit');
+  btn.disabled = true; btn.textContent = 'Сохраняем...';
+  var user = await registerUser(name, email, selectedGender);
+  btn.disabled = false; btn.textContent = 'Зарегистрироваться →';
+  if (user) startOnboarding();
+}
+
+// ============================================================
+// ONBOARDING
+// ============================================================
+var ob = { step: 0, time: '', budget: '', style: '', goal: '', founderType: '' };
+var OB_ANSWERS = { 1: '', 2: '', 3: '', 4: '' };
+
+var OB_QUESTIONS = [
+  null,
+  {
+    title: 'Сколько времени в день ты реально готов уделять своему делу?',
+    hint: 'Учёба, друзья, отдых — это тоже важно. Отвечай честно, мы подберём ритм под тебя.',
+    key: 'time',
+    options: [
+      { emoji: '\u23F0', main: '15–30 минут', sub: 'плотный график', value: '15min' },
+      { emoji: '\u{1F550}', main: '1 час', sub: 'могу выделить вечер', value: '1h' },
+      { emoji: '\u26A1', main: '2–3 часа', sub: 'я серьёзно настроен', value: '3h' },
+      { emoji: '\u{1F525}', main: 'Всё свободное время', sub: 'режим хастла', value: 'all' }
+    ]
+  },
+  {
+    title: 'Сколько денег ты готов вложить в старт?',
+    hint: 'В игре это станет твоим стартовым капиталом. Не переживай — заработаешь больше.',
+    key: 'budget',
+    options: [
+      { emoji: '\u{1F4B8}', main: '$0', sub: 'стартую с нуля', value: '0' },
+      { emoji: '\u{1F4B5}', main: 'До $50', sub: 'есть немного карманных', value: '50' },
+      { emoji: '\u{1F4B0}', main: 'До $200', sub: 'отложил специально', value: '200' },
+      { emoji: '\u{1F911}', main: '$500+', sub: 'готов инвестировать всерьёз', value: '500' }
+    ]
+  },
+  {
+    title: 'Что тебе ближе?',
+    hint: 'Это определит твой тип основателя и стартовые бонусы.',
+    key: 'style',
+    options: [
+      { emoji: '\u{1F3C3}', main: 'Делать и пробовать', sub: 'план придумаю по ходу', value: 'hustler' },
+      { emoji: '\u{1F3A8}', main: 'Создавать что-то крутое', sub: 'красивое и уникальное', value: 'creator' },
+      { emoji: '\u{1F9E0}', main: 'Изучить и спланировать', sub: 'потом запустить идеально', value: 'strategist' },
+      { emoji: '\u{1F91D}', main: 'Общаться с людьми', sub: 'строить связи и команду', value: 'connector' }
+    ]
+  },
+  {
+    title: 'Зачем тебе всё это?',
+    hint: 'Поможем держать фокус на твоей настоящей мотивации.',
+    key: 'goal',
+    options: [
+      { emoji: '\u{1F4B5}', main: 'Заработать свои первые деньги', sub: 'реальные, не виртуальные', value: 'money' },
+      { emoji: '\u{1F680}', main: 'Построить настоящий бизнес', sub: 'серьёзно и надолго', value: 'business' },
+      { emoji: '\u{1F393}', main: 'Научиться новому', sub: 'ради опыта и роста', value: 'learn' },
+      { emoji: '\u{1F60E}', main: 'Просто интересно попробовать', sub: 'без лишних обязательств', value: 'explore' }
+    ]
+  }
+];
+
+var STYLE_TO_TYPE = { hustler: 'Hustler', creator: 'Creator', strategist: 'Strategist', connector: 'Connector' };
+
+var FOUNDER_TYPES = {
+  Hustler:    { emoji: '\u{1F3C3}', color: '#f59e0b', desc: 'Ты действуешь быстро и учишься на ходу. Первые деньги придут раньше, чем у тех, кто планирует.', ability: 'Быстрый старт — ты получаешь задания раньше других' },
+  Creator:    { emoji: '\u{1F3A8}', color: '#ec4899', desc: 'Ты создаёшь вещи, которые люди хотят купить. Твой продукт — твой голос.', ability: 'Бонус за дизайн-квесты +30% к награде' },
+  Strategist: { emoji: '\u{1F9E0}', color: '#6366f1', desc: 'Ты думаешь на шаг вперёд. Ошибаешься реже — зарабатываешь стабильнее.', ability: 'Скам-детектор активирован — защита от потерь' },
+  Connector:  { emoji: '\u{1F91D}', color: '#06d6a0', desc: 'Твоя сила — люди вокруг тебя. Нетворкинг — самый прибыльный навык.', ability: 'Бонус +20% XP за каждый завершённый диалог' }
+};
+
+var BUDGET_TO_MONEY = { '0': 0, '50': 2500, '200': 10000, '500': 25000 };
+var GOAL_TO_QUEST = {
+  money: 'Ответить Aziz и получить первый заказ',
+  business: 'Пройти все 8 основных миссий',
+  learn: 'Изучить урок от Ментора',
+  explore: 'Пообщаться с персонажами и посмотреть, что будет'
+};
+
+function startOnboarding() {
+  ob = { step: 0, time: '', budget: '', style: '', goal: '', founderType: '' };
+  OB_ANSWERS = { 1: '', 2: '', 3: '', 4: '' };
+  showScreen('ob');
+  obShowIntro();
+}
+function obShowIntro() {
+  document.getElementById('ob-intro').style.display = 'flex';
+  document.getElementById('ob-q-screen').style.display = 'none';
+  document.getElementById('ob-result-screen').style.display = 'none';
+}
+function obGoToQuestion(n) {
+  ob.step = n;
+  document.getElementById('ob-intro').style.display = 'none';
+  document.getElementById('ob-q-screen').style.display = 'flex';
+  document.getElementById('ob-result-screen').style.display = 'none';
+  renderObQuestion(n);
+}
+function obGoBack() {
+  if (ob.step <= 1) obShowIntro(); else obGoToQuestion(ob.step - 1);
+}
+function renderObQuestion(n) {
+  var q = OB_QUESTIONS[n];
+  document.getElementById('ob-fill').style.width = (n / 4 * 100) + '%';
+  document.getElementById('ob-prog-label').textContent = n + ' из 4';
+  var body = document.getElementById('ob-q-body');
+  var currentVal = OB_ANSWERS[n];
+  body.innerHTML = '<div class="ob-q-title">' + q.title + '</div><div class="ob-q-hint">' + q.hint + '</div><div class="ob-cards" id="ob-cards-' + n + '"></div>';
+  var container = document.getElementById('ob-cards-' + n);
+  q.options.forEach(function(opt) {
+    var btn = document.createElement('button');
+    btn.className = 'ob-card' + (currentVal === opt.value ? ' sel' : '');
+    btn.innerHTML = '<div class="ob-card-emoji">' + opt.emoji + '</div><div class="ob-card-text"><div class="ob-card-main">' + opt.main + '</div><div class="ob-card-sub">' + opt.sub + '</div></div><div class="ob-card-check">' + (currentVal === opt.value ? '&#x2713;' : '') + '</div>';
+    btn.onclick = function() {
+      OB_ANSWERS[n] = opt.value;
+      ob[q.key] = opt.value;
+      container.querySelectorAll('.ob-card').forEach(function(b) { b.classList.remove('sel'); b.querySelector('.ob-card-check').textContent = ''; });
+      btn.classList.add('sel');
+      btn.querySelector('.ob-card-check').innerHTML = '&#x2713;';
+      document.getElementById('ob-next-btn').disabled = false;
+    };
+    container.appendChild(btn);
+  });
+  document.getElementById('ob-next-btn').disabled = !currentVal;
+  document.getElementById('ob-next-btn').textContent = n === 4 ? 'Узнать свой тип →' : 'Дальше →';
+}
+function obNext() {
+  if (ob.step < 4) obGoToQuestion(ob.step + 1); else obShowResult();
+}
+function obShowResult() {
+  var ft = STYLE_TO_TYPE[ob.style] || 'Hustler';
+  ob.founderType = ft;
+  var ftData = FOUNDER_TYPES[ft];
+  var startMoney = BUDGET_TO_MONEY[ob.budget] || 0;
+  var firstQuest = GOAL_TO_QUEST[ob.goal] || GOAL_TO_QUEST.explore;
+  document.getElementById('ob-q-screen').style.display = 'none';
+  document.getElementById('ob-result-screen').style.display = 'flex';
+  document.getElementById('ob-result-content').innerHTML =
+    '<div class="ob-result-hero">' +
+      '<div class="ob-result-emoji">' + ftData.emoji + '</div>' +
+      '<div class="ob-result-type-label">Твой тип основателя</div>' +
+      '<div class="ob-result-name" style="color:' + ftData.color + '">' + ft + '</div>' +
+      '<div class="ob-result-desc">' + ftData.desc + '</div>' +
+    '</div>' +
+    '<div class="ob-bonuses">' +
+      '<div class="ob-bonuses-title">Твои стартовые бонусы</div>' +
+      '<div class="ob-bonus-row"><div class="ob-bonus-icon">&#x1F4B0;</div><div><div class="ob-bonus-label">Стартовый капитал</div><div class="ob-bonus-val">' + (startMoney > 0 ? startMoney.toLocaleString('ru') + '\u20B8' : 'С нуля — зарабатывай сам!') + '</div></div></div>' +
+      '<div class="ob-bonus-row"><div class="ob-bonus-icon">&#x26A1;</div><div><div class="ob-bonus-label">Бонусная способность</div><div class="ob-bonus-val">' + ftData.ability + '</div></div></div>' +
+      '<div class="ob-bonus-row"><div class="ob-bonus-icon">&#x1F3AF;</div><div><div class="ob-bonus-label">Первый квест</div><div class="ob-bonus-val">' + firstQuest + '</div></div></div>' +
+    '</div>';
+}
+async function finishOnboarding() {
+  var ft = ob.founderType || 'Hustler';
+  var startMoney = BUDGET_TO_MONEY[ob.budget] || 0;
+  localStorage.setItem('founder_type', ft);
+  loadState();
+  if (startMoney > 0) {
+    state.money += startMoney;
+    state.transactions.unshift({ id: Date.now(), desc: 'Стартовый капитал', amount: startMoney, icon: '\u{1F4B0}', date: 'Начало', color: 'green' });
+    saveState();
+  }
+  var userId = localStorage.getItem('user_id');
+  if (userId) {
+    try {
+      await sb.from('users').update({ founder_type: ft, data: { time: ob.time, budget: ob.budget, style: ob.style, goal: ob.goal } }).eq('id', userId);
+      await sb.from('progress').insert([{ user_id: userId, mission_number: 0, data: { founder_type: ft, start_money: startMoney, answers: { time: ob.time, budget: ob.budget, style: ob.style, goal: ob.goal }, completed_at: new Date().toISOString() } }]);
+    } catch(e) { console.log('Supabase error', e); }
+  }
+  dailyCheckIn();
+  showScreen('game');
+}
+
+// ============================================================
+// DAILY CHECK-IN
+// ============================================================
+function dailyCheckIn() {
+  var last = localStorage.getItem('last_login_date');
+  var today = new Date().toDateString();
+  if (last !== today) {
+    localStorage.setItem('last_login_date', today);
+    var prev = localStorage.getItem('prev_login_date');
+    var yesterday = new Date(Date.now() - 86400000).toDateString();
+    var newStreak = (prev === yesterday) ? (state.streak || 0) + 1 : 1;
+    var bonus = newStreak >= 7 ? 1000 : newStreak >= 3 ? 300 : 100;
+    state.streak = newStreak;
+    state.money += bonus;
+    state.transactions.unshift({ id: Date.now(), desc: 'Ежедневный бонус', amount: bonus, icon: '\u{1F381}', date: 'Сейчас', color: 'green' });
+    if (state.transactions.length > 20) state.transactions.length = 20;
+    saveState();
+    localStorage.setItem('prev_login_date', last || today);
+    setTimeout(function() { showToast('\u{1F525} День ' + newStreak + ' подряд! +' + bonus + '\u20B8'); }, 900);
+  }
+}
+
+// ============================================================
+// GAME INIT
+// ============================================================
+var clockInterval = null;
+var currentApp = null;
+
+function initGame() {
+  if (clockInterval) clearInterval(clockInterval);
+  renderHomeScreen();
+  renderDMsTab();
+  renderWalletTab();
+  renderQuestsTab();
+  renderStatsTab();
+  updateTopBar();
+  updateDmsBadge();
+  clockInterval = setInterval(function() {
+    var t = new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+    var el = document.getElementById('home-clock');
+    if (el) el.textContent = t;
+    var sb2 = document.getElementById('sb-time');
+    if (sb2) sb2.textContent = t;
+  }, 15000);
+  var sn = document.getElementById('settings-name');
+  if (sn) sn.textContent = localStorage.getItem('user_name') || '—';
+  var se = document.getElementById('settings-email');
+  if (se) se.textContent = localStorage.getItem('user_email') || '—';
+}
+
+function updateTopBar() {
+  var gm = document.getElementById('g-money');
+  if (gm) gm.textContent = '\u{1F4B0} ' + fmtMoney(state.money);
+  var gs = document.getElementById('g-streak');
+  if (gs) gs.textContent = '\u{1F525} ' + (state.streak || 0) + ' дн';
+  var gx = document.getElementById('g-xp');
+  if (gx) gx.textContent = '\u2B50 ' + state.xp + ' XP';
+}
+
+function updateDmsBadge() {
+  var dialogs = ['aziz', 'scammer', 'mentor'];
+  var unread = dialogs.filter(function(d) { return !state.completedDialogs[d]; }).length;
+  var badge = document.getElementById('dms-badge');
+  if (badge) { badge.textContent = unread; badge.classList.toggle('show', unread > 0); }
+  renderHomeScreen();
+}
+
+// ============================================================
+// APP NAVIGATION
+// ============================================================
+var APP_DEFS = [
+  { id: 'dms',      emoji: '\u{1F4AC}', label: 'Сообщения', bg: 'linear-gradient(135deg,#34C759,#1a8f36)', hasBadge: true },
+  { id: 'wallet',   emoji: '\u{1F4B0}', label: 'Кошелёк',   bg: 'linear-gradient(135deg,#007AFF,#0051cc)' },
+  { id: 'quests',   emoji: '\u{1F3AF}', label: 'Квесты',     bg: 'linear-gradient(135deg,#FF9500,#cc7400)' },
+  { id: 'stats',    emoji: '\u{1F464}', label: 'Профиль',    bg: 'linear-gradient(135deg,#5856D6,#3634a3)' },
+  { id: 'market',   emoji: '\u{1F6D2}', label: 'Маркет',     bg: 'linear-gradient(135deg,#FF6B6B,#c73a3a)' },
+  { id: 'settings', emoji: '\u2699\uFE0F', label: 'Настройки', bg: 'linear-gradient(135deg,#636366,#3a3a3c)' }
+];
+
+function openApp(appId) {
+  if (currentApp) {
+    var prev = document.getElementById('app-' + currentApp);
+    if (prev) prev.classList.remove('open');
+  }
+  currentApp = appId;
+  var layer = document.getElementById('app-' + appId);
+  if (!layer) { showToast('Скоро...'); currentApp = null; return; }
+  if (appId === 'wallet') { renderWalletTab(); updateTopBar(); }
+  if (appId === 'quests') renderQuestsTab();
+  if (appId === 'stats') renderStatsTab();
+  if (appId === 'dms') renderDMsTab();
+  requestAnimationFrame(function() { layer.classList.add('open'); });
+}
+
+function closeApp() {
+  if (currentApp === 'dms') {
+    var dmEl = document.getElementById('tab-dms');
+    if (dmEl && dmEl.querySelector('.chat-win')) { closeChatWindow(); return; }
+  }
+  if (currentApp) {
+    var layer = document.getElementById('app-' + currentApp);
+    if (layer) layer.classList.remove('open');
+    currentApp = null;
+  }
+  renderHomeScreen();
+}
+
+function switchTab(tab) { openApp(tab); }
+
+// ============================================================
+// HOME SCREEN
+// ============================================================
+function renderHomeScreen() {
+  var now = new Date();
+  var h = now.getHours();
+  var timeStr = now.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+  var dateStr = now.toLocaleDateString('ru', { weekday: 'long', month: 'long', day: 'numeric' });
+  var gr = h < 12 ? 'Доброе утро' : h < 18 ? 'Добрый день' : 'Добрый вечер';
+  var userName = localStorage.getItem('user_name') || 'Основатель';
+  var unread = ['aziz', 'scammer', 'mentor'].filter(function(d) { return !state.completedDialogs[d]; }).length;
+
+  var cl = document.getElementById('home-clock');
+  if (cl) cl.textContent = timeStr;
+  var sbEl = document.getElementById('sb-time');
+  if (sbEl) sbEl.textContent = timeStr;
+  var ds = document.getElementById('home-date-str');
+  if (ds) ds.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  var grEl = document.getElementById('hw-greeting');
+  if (grEl) grEl.textContent = gr + ', ' + userName + '!';
+  var msgEl = document.getElementById('hw-msg');
+  if (msgEl) msgEl.textContent = unread > 0 ? ('У тебя ' + unread + ' ' + (unread === 1 ? 'новое сообщение' : 'новых сообщения') + ' \uD83D\uDCAC') : 'Всё прочитано. Продолжай хаслить!';
+  var actEl = document.getElementById('hw-action');
+  if (actEl) actEl.style.display = unread > 0 ? 'flex' : 'none';
+
+  // Build icon grid using DOM (no string escaping issues)
+  function buildIconGrid(containerId, apps, wrapClass, boxClass, labelClass, badgeClass) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    apps.forEach(function(app) {
+      var b = app.hasBadge ? unread : 0;
+      var wrap = document.createElement('div');
+      wrap.className = wrapClass;
+      (function(id) { wrap.onclick = function() { openApp(id); }; }(app.id));
+      var box = document.createElement('div');
+      box.className = boxClass;
+      box.style.background = app.bg;
+      box.textContent = app.emoji;
+      if (b > 0) {
+        var badge = document.createElement('div');
+        badge.className = badgeClass;
+        badge.textContent = b;
+        box.appendChild(badge);
+      }
+      var lbl = document.createElement('div');
+      lbl.className = labelClass;
+      lbl.textContent = app.label;
+      wrap.appendChild(box);
+      wrap.appendChild(lbl);
+      container.appendChild(wrap);
+    });
+  }
+
+  buildIconGrid('home-app-grid', APP_DEFS, 'app-ico', 'app-ico-box', 'app-ico-label', 'app-badge');
+  buildIconGrid('home-dock', APP_DEFS.slice(0, 4), 'dock-ico', 'dock-ico-box', 'dock-ico-label', 'dock-badge');
+}
+
+// ============================================================
+// DMs TAB
+// ============================================================
+var DIALOG_LIST = [
+  { id: 'aziz',    name: 'Aziz',       emoji: '\u{1F464}', bg: '#e3f2fd', preview: 'Привет! Нужен дизайн...', time: 'Сейчас', tag: 'client' },
+  { id: 'mentor',  name: 'Ментор',     emoji: '\u{1F393}', bg: '#e8f5e9', preview: 'Совет дня: ценообразование', time: '10:30', tag: 'mentor' },
+  { id: 'mama',    name: 'Мама',       emoji: '\u{1F469}', bg: '#fce4ec', preview: 'Не забудь поесть', time: '08:15', tag: 'family' },
+  { id: 'scammer', name: 'Незнакомец', emoji: '\u26A0\uFE0F', bg: '#ffebee', preview: 'СРОЧНО! Заплати 5000...', time: 'Вчера', tag: 'scam' },
+  { id: 'daniyar', name: 'Данияр',     emoji: '\u{1F642}', bg: '#f3e5f5', preview: 'Как проект? Расскажи', time: 'Вчера', tag: 'friend' }
+];
+
+function renderDMsTab() {
+  var el = document.getElementById('tab-dms');
+  if (!el || el.querySelector('.chat-win')) return; // don't overwrite open chat
+  el.innerHTML = '<div class="ph-head">Сообщения</div><div class="dm-list" id="dm-list-inner"></div>';
+  var list = document.getElementById('dm-list-inner');
+  DIALOG_LIST.forEach(function(d) {
+    var unread = !state.completedDialogs[d.id] && (d.id === 'aziz' || d.id === 'scammer' || d.id === 'mentor');
+    var done = !!state.completedDialogs[d.id];
+    var item = document.createElement('div');
+    item.className = 'dm-item';
+    (function(id) { item.onclick = function() { openDialog(id); }; }(d.id));
+    var dotHtml = unread ? '<div class="dm-dot"></div>' : '';
+    var doneHtml = done ? '<span style="margin-left:auto;color:#34C759;font-size:12px">&#x2713;</span>' : '';
+    item.innerHTML =
+      '<div class="dm-av" style="background:' + d.bg + '">' + d.emoji + '</div>' +
+      '<div class="dm-right">' +
+        '<div class="dm-top"><div class="dm-name">' + d.name + '</div><div class="dm-time">' + d.time + '</div></div>' +
+        '<div class="dm-preview' + (d.tag === 'scam' ? ' dm-red' : '') + '">' + dotHtml + d.preview + doneHtml + '</div>' +
+      '</div>';
+    list.appendChild(item);
+  });
+}
+
+// ============================================================
+// DIALOGS DATA
+// ============================================================
+var DIALOGS = {
+  aziz: {
+    name: 'Aziz', emoji: '\u{1F464}', bg: '#e3f2fd', tag: 'client',
+    flow: [
+      { from: 'them', text: 'Привет! Мне нужен дизайн для школьного проекта. Платят 5,000\u20B8. Возьмёшься?' },
+      { choices: [
+        { text: 'Конечно, возьмусь!', branch: 'accept' },
+        { text: 'Давай за 8,000\u20B8', branch: 'negotiate' },
+        { text: 'А что именно нужно?', branch: 'ask' },
+        { text: 'Не могу сейчас', branch: 'decline' }
+      ]}
+    ],
+    accept: [
+      { from: 'me', text: 'Конечно, возьмусь!' },
+      { from: 'them', text: 'Отлично! Нужен постер А4 — название проекта, 3 пункта и логотип. Дедлайн завтра.' },
+      { choices: [{ text: 'Сделаю к вечеру', branch: 'done_accept' }] }
+    ],
+    done_accept: [
+      { from: 'me', text: 'Сделаю к вечеру!' },
+      { from: 'them', text: 'Спасибо! Переведу как получу.' },
+      { result: { money: 5000, xp: 50, msg: '+5,000\u20B8 и +50 XP!', type: 'ok', skill: 'negotiation', sval: 3 } }
+    ],
+    negotiate: [
+      { from: 'me', text: 'Давай за 8,000\u20B8 — у меня есть опыт.' },
+      { from: 'them', text: 'Хмм... ладно, 6,500\u20B8. Финальная цена.' },
+      { choices: [
+        { text: 'Договорились!', branch: 'done_neg_ok' },
+        { text: 'Нет, 7,500\u20B8 минимум', branch: 'done_neg_no' }
+      ]}
+    ],
+    done_neg_ok: [
+      { from: 'me', text: 'Договорились на 6,500\u20B8!' },
+      { from: 'them', text: 'Отлично, тогда жди задание.' },
+      { result: { money: 6500, xp: 75, msg: '+6,500\u20B8! Переговоры +75 XP', type: 'ok', skill: 'negotiation', sval: 8 } }
+    ],
+    done_neg_no: [
+      { from: 'me', text: '7,500\u20B8 — мой минимум.' },
+      { from: 'them', text: 'Извини, это слишком много. Найду другого.' },
+      { result: { money: 0, xp: 20, msg: 'Сделка сорвалась. +20 XP за опыт', type: 'neutral', skill: 'sales', sval: 2 } }
+    ],
+    ask: [
+      { from: 'me', text: 'А что именно нужно сделать?' },
+      { from: 'them', text: 'Постер А4: "EcoKaz", 3 факта об экологии, наш логотип. Дедлайн — завтра 18:00.' },
+      { choices: [
+        { text: 'Беру за 5,000\u20B8', branch: 'done_accept' },
+        { text: 'Беру за 7,000\u20B8', branch: 'negotiate' }
+      ]}
+    ],
+    decline: [
+      { from: 'me', text: 'Не могу сейчас, извини.' },
+      { from: 'them', text: 'Понял, ладно.' },
+      { result: { money: 0, xp: 5, msg: 'Отказался. Иногда нужно говорить нет.', type: 'neutral', skill: 'sales', sval: 1 } }
+    ]
+  },
+  scammer: {
+    name: 'Незнакомец', emoji: '\u26A0\uFE0F', bg: '#ffebee', tag: 'scam',
+    flow: [
+      { from: 'them', text: 'СРОЧНО! Вы выбраны для участия в программе. Переведи 5,000\u20B8 сейчас — получи 50,000\u20B8 через час!', scam: true },
+      { choices: [
+        { text: 'Это скам! Блокирую.', branch: 'good' },
+        { text: 'Расскажи подробнее...', branch: 'trap' },
+        { text: 'Хорошо, переведу', branch: 'bad' }
+      ]}
+    ],
+    good: [
+      { from: 'me', text: 'Это скам! Блокирую.' },
+      { from: 'sys', text: 'Контакт заблокирован' },
+      { result: { money: 0, xp: 100, msg: 'Скам распознан! +100 XP', type: 'ok', badge: 'scam_detector' } }
+    ],
+    trap: [
+      { from: 'me', text: 'Расскажи подробнее...' },
+      { from: 'them', text: 'Это официальная программа! Нужно только подтвердить перевод 5,000\u20B8 — это возвратный депозит.', scam: true },
+      { from: 'them', text: 'ТОРОПИСЬ! Осталось 10 минут!', scam: true },
+      { choices: [
+        { text: 'Всё ясно, это развод!', branch: 'good_late' },
+        { text: 'Ладно, переведу...', branch: 'bad' }
+      ]}
+    ],
+    good_late: [
+      { from: 'me', text: 'Всё ясно — это развод! Блокирую.' },
+      { from: 'sys', text: 'Контакт заблокирован' },
+      { result: { money: 0, xp: 60, msg: 'Скам распознан чуть позже. +60 XP', type: 'ok', badge: 'scam_detector' } }
+    ],
+    bad: [
+      { from: 'me', text: 'Хорошо, переведу...' },
+      { from: 'them', text: 'Отлично! Переводи на номер: 8 777 XXX XXXX', scam: true },
+      { from: 'sys', text: 'СТОП! Это классический скам. Никогда не переводи деньги незнакомцам!' },
+      { result: { money: -5000, xp: 30, msg: 'Потерял 5,000\u20B8. Урок усвоен.', type: 'bad' } }
+    ]
+  },
+  mentor: {
+    name: 'Ментор', emoji: '\u{1F393}', bg: '#e8f5e9', tag: 'mentor',
+    flow: [
+      { from: 'them', text: 'Привет! Сегодня поговорим про ценообразование. Знаешь главную ошибку начинающих?' },
+      { choices: [
+        { text: 'Слишком низкие цены?', branch: 'price_low' },
+        { text: 'Слишком высокие цены?', branch: 'price_high' },
+        { text: 'Не знаю, расскажи', branch: 'price_tell' }
+      ]}
+    ],
+    price_low: [
+      { from: 'me', text: 'Слишком низкие цены?' },
+      { from: 'them', text: 'Именно! Низкая цена = низкое качество в глазах покупателя. Плюс работаешь много, зарабатываешь мало.' },
+      { choices: [{ text: 'Как правильно ставить цену?', branch: 'formula' }] }
+    ],
+    price_high: [
+      { from: 'me', text: 'Слишком высокие цены?' },
+      { from: 'them', text: 'Нет, начинающие чаще занижают. Низкая цена привлекает плохих клиентов.' },
+      { choices: [{ text: 'Как правильно ставить цену?', branch: 'formula' }] }
+    ],
+    price_tell: [
+      { from: 'me', text: 'Не знаю, расскажи!' },
+      { from: 'them', text: 'Главная ошибка — ставить цену по затратам, а не по ценности для клиента.' },
+      { choices: [{ text: 'Объясни подробнее', branch: 'formula' }] }
+    ],
+    formula: [
+      { from: 'them', text: 'Формула: Цена = Ценность для клиента × 0.1-0.3\n\nЕсли клиент заработает 50,000\u20B8 на твоём дизайне — бери 5,000-15,000\u20B8. Это справедливо!' },
+      { choices: [{ text: 'Понял, спасибо!', branch: 'done_mentor' }] }
+    ],
+    done_mentor: [
+      { from: 'me', text: 'Понял, буду применять!' },
+      { from: 'them', text: 'Отлично! Завтра поговорим про первых клиентов' },
+      { result: { money: 0, xp: 80, msg: 'Урок пройден! +80 XP', type: 'ok', skill: 'marketing', sval: 6 } }
+    ]
+  },
+  mama: {
+    name: 'Мама', emoji: '\u{1F469}', bg: '#fce4ec', tag: 'family',
+    flow: [
+      { from: 'them', text: 'Привет! Не забудь поесть сегодня. И как твой проект?' },
+      { choices: [
+        { text: 'Всё хорошо, мама!', branch: 'mama_ok' },
+        { text: 'Расскажу вечером!', branch: 'mama_later' }
+      ]}
+    ],
+    mama_ok: [
+      { from: 'me', text: 'Всё хорошо, мама!' },
+      { from: 'them', text: 'Умничка! Приходи ужинать' },
+      { result: { money: 0, xp: 10, msg: '+10 XP. Мама довольна!', type: 'ok' } }
+    ],
+    mama_later: [
+      { from: 'me', text: 'Расскажу вечером!' },
+      { from: 'them', text: 'Хорошо, жду! Люблю тебя' },
+      { result: { money: 0, xp: 10, msg: '+10 XP. Мама довольна!', type: 'ok' } }
+    ]
+  },
+  daniyar: {
+    name: 'Данияр', emoji: '\u{1F642}', bg: '#f3e5f5', tag: 'friend',
+    flow: [
+      { from: 'them', text: 'Йоу! Как проект? Слышал, ты что-то крутое делаешь' },
+      { choices: [
+        { text: 'Да, скоро расскажу!', branch: 'dan_hype' },
+        { text: 'Пока только учусь...', branch: 'dan_humble' }
+      ]}
+    ],
+    dan_hype: [
+      { from: 'me', text: 'Да, скоро расскажу! Будет огонь' },
+      { from: 'them', text: 'Окей, жду! Если что-то нужно — помогу' },
+      { result: { money: 0, xp: 15, msg: '+15 XP. Друзья — лучшая поддержка!', type: 'ok' } }
+    ],
+    dan_humble: [
+      { from: 'me', text: 'Пока только учусь, но прогресс есть!' },
+      { from: 'them', text: 'Главное не останавливаться! Ты справишься!' },
+      { result: { money: 0, xp: 15, msg: '+15 XP. Поддержка важна!', type: 'ok' } }
+    ]
+  }
+};
+
+// ============================================================
+// CHAT ENGINE
+// ============================================================
+var chatState = {};
+var _chatChooseLocked = false;
+
+function openDialog(dialogId) {
+  var dialog = DIALOGS[dialogId];
+  if (!dialog) { showToast('Диалог скоро...'); return; }
+  chatState = { dialogId: dialogId, msgs: [], branch: 'flow', stepIdx: 0, done: false, skipFirstMe: false };
+  _chatChooseLocked = false;
+  renderChatWindow();
+  setTimeout(function() { flowNextStep(); }, 100);
+}
+
+function renderChatWindow() {
+  var el = document.getElementById('tab-dms');
+  var d = DIALOGS[chatState.dialogId];
+  var statusLabel = d.tag === 'client' ? 'Клиент' : d.tag === 'scam' ? 'Осторожно!' : d.tag === 'mentor' ? 'Ментор' : '';
+  el.innerHTML =
+    '<div class="chat-win" style="height:100%;display:flex;flex-direction:column">' +
+      '<div class="chat-hdr">' +
+        '<button class="chat-back" onclick="closeChatWindow()">\u2039</button>' +
+        '<div class="chat-hdr-av" style="background:' + d.bg + '">' + d.emoji + '</div>' +
+        '<div><div class="chat-hdr-name">' + d.name + '</div><div class="chat-hdr-status">' + statusLabel + '</div></div>' +
+      '</div>' +
+      '<div class="chat-msgs" id="chat-msgs" style="flex:1;overflow-y:auto;background:#f5f5f7"></div>' +
+      '<div id="chat-bottom"></div>' +
+    '</div>';
+}
+
+function closeChatWindow() {
+  var el = document.getElementById('tab-dms');
+  if (el) el.innerHTML = '';
+  renderDMsTab();
+  updateDmsBadge();
+}
+
+function flowNextStep() {
+  var d = DIALOGS[chatState.dialogId];
+  var branch = d[chatState.branch];
+  if (!branch || chatState.stepIdx >= branch.length) return;
+  var item = branch[chatState.stepIdx];
+  if (item.from === 'me' && chatState.skipFirstMe) {
+    chatState.skipFirstMe = false;
+    chatState.stepIdx++;
+    flowNextStep();
+    return;
+  }
+  chatState.skipFirstMe = false;
+  chatState.stepIdx++;
+  if (item.from) {
+    appendBubble(item.from, item.text, item.scam);
+    setTimeout(function() { flowNextStep(); }, 350);
+  } else if (item.choices) {
+    renderChoices(item.choices);
+  } else if (item.result) {
+    applyResult(item.result);
+  }
+}
+
+function appendBubble(from, text, scam) {
+  var msgs = document.getElementById('chat-msgs');
+  if (!msgs) return;
+  var rowCls = from === 'me' ? 'me' : from === 'sys' ? 'sys' : 'them';
+  var bubCls = from === 'me' ? 'me' : from === 'sys' ? 'sys' : (scam ? 'scam' : 'them');
+  var div = document.createElement('div');
+  div.className = 'brow ' + rowCls;
+  var bub = document.createElement('div');
+  bub.className = 'bubble ' + bubCls;
+  bub.innerHTML = text.replace(/\n/g, '<br>');
+  div.appendChild(bub);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderChoices(choices) {
+  var bottom = document.getElementById('chat-bottom');
+  if (!bottom) return;
+  bottom.innerHTML = '';
+  var wrap = document.createElement('div');
+  wrap.className = 'chat-choices';
+  choices.forEach(function(c, i) {
+    var btn = document.createElement('button');
+    btn.className = 'cchoice';
+    btn.textContent = c.text;
+    (function(idx) {
+      btn.onclick = function() { chooseAnswer(idx, choices); };
+    }(i));
+    wrap.appendChild(btn);
+  });
+  bottom.appendChild(wrap);
+}
+
+function chooseAnswer(idx, choices) {
+  if (_chatChooseLocked) return;
+  _chatChooseLocked = true;
+  var choice = choices[idx];
+  var bottom = document.getElementById('chat-bottom');
+  if (bottom) {
+    var btns = bottom.querySelectorAll('.cchoice');
+    btns.forEach(function(b, i) { b.classList.toggle('chosen', i === idx); b.disabled = true; b.style.pointerEvents = 'none'; });
+  }
+  setTimeout(function() {
+    if (bottom) bottom.innerHTML = '';
+    appendBubble('me', choice.text);
+    chatState.branch = choice.branch;
+    chatState.stepIdx = 0;
+    chatState.skipFirstMe = true;
+    setTimeout(function() { _chatChooseLocked = false; flowNextStep(); }, 300);
+  }, 200);
+}
+
+function applyResult(result) {
+  if (result.money) state.money = Math.max(0, state.money + result.money);
+  if (result.xp) state.xp += result.xp;
+  if (result.skill && state.skills[result.skill] !== undefined && result.sval) {
+    state.skills[result.skill] = Math.min(100, state.skills[result.skill] + result.sval);
+  }
+  if (result.badge && state.badges.indexOf(result.badge) < 0) state.badges.push(result.badge);
+  var did = chatState.dialogId;
+  if (did === 'aziz' && result.money > 0) state.dailyQuests.q2 = true;
+  if (did === 'scammer') state.dailyQuests.q3 = true;
+  if (Object.keys(state.completedDialogs).length + 1 >= 3) state.dailyQuests.q1 = true;
+  state.completedDialogs[chatState.dialogId] = true;
+  state.transactions.unshift({
+    id: Date.now(), desc: DIALOGS[chatState.dialogId].name,
+    amount: result.money || 0,
+    icon: result.money > 0 ? '\u{1F4B0}' : result.money < 0 ? '\u{1F4C9}' : '\u{1F4DA}',
+    date: 'Сейчас', color: result.money >= 0 ? 'green' : 'red'
+  });
+  if (state.transactions.length > 20) state.transactions.length = 20;
+  saveState();
+  updateTopBar();
+  var userId = localStorage.getItem('user_id');
+  if (userId) {
+    sb.from('events').insert([{ user_id: userId, event_type: 'dialog_complete', event_data: { dialog: chatState.dialogId, money: result.money, xp: result.xp } }]).then(function() {});
+    sb.from('users').update({ total_money: state.money, total_xp: state.xp }).eq('id', userId).then(function() {});
+  }
+  var msgs = document.getElementById('chat-msgs');
+  if (msgs) {
+    var colors = { ok: '#e8fdf0', bad: '#fdeaea', neutral: '#f5f5f5' };
+    var tcolors = { ok: '#1a7a3c', bad: '#cc0000', neutral: '#555' };
+    var bcolors = { ok: '#34C759', bad: '#FF3B30', neutral: '#ddd' };
+    var resDiv = document.createElement('div');
+    resDiv.style.cssText = 'display:flex;justify-content:center;margin-top:10px';
+    var badge = document.createElement('div');
+    badge.className = 'result-badge';
+    badge.style.cssText = 'background:' + (colors[result.type] || '#f5f5f5') + ';border-color:' + (bcolors[result.type] || '#ddd') + ';color:' + (tcolors[result.type] || '#555');
+    badge.textContent = result.msg;
+    resDiv.appendChild(badge);
+    msgs.appendChild(resDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  var bottom = document.getElementById('chat-bottom');
+  if (bottom) {
+    bottom.innerHTML = '';
+    var resBar = document.createElement('div');
+    resBar.className = 'chat-result';
+    var backBtn = document.createElement('button');
+    backBtn.className = 'btn-blue';
+    backBtn.textContent = '\u2190 Назад';
+    backBtn.onclick = closeChatWindow;
+    resBar.appendChild(backBtn);
+    bottom.appendChild(resBar);
+  }
+  updateDmsBadge();
+}
+
+// ============================================================
+// WALLET TAB
+// ============================================================
+function renderWalletTab() {
+  var el = document.getElementById('tab-wallet');
+  if (!el) return;
+  var txHtml = '';
+  if (state.transactions.length === 0) {
+    txHtml = '<div style="color:var(--pmuted);font-size:13px;text-align:center;padding:20px 0">Ещё нет транзакций</div>';
+  } else {
+    state.transactions.forEach(function(tx) {
+      var pos = tx.amount >= 0;
+      txHtml +=
+        '<div class="tx-item">' +
+          '<div class="tx-left">' +
+            '<div class="tx-icon" style="background:' + (pos ? '#e8fdf0' : '#fdeaea') + '">' + (tx.icon || '\u{1F4B0}') + '</div>' +
+            '<div><div class="tx-desc">' + tx.desc + '</div><div class="tx-date">' + tx.date + '</div></div>' +
+          '</div>' +
+          '<div class="tx-amount ' + (pos ? 'tx-pos' : 'tx-neg') + '">' + (pos ? '+' : '') + fmtMoney(tx.amount) + '</div>' +
+        '</div>';
+    });
+  }
+  el.innerHTML =
+    '<div class="ph-head">Кошелёк</div>' +
+    '<div class="wallet-hero">' +
+      '<div class="w-label">Баланс</div>' +
+      '<div class="w-amount">' + fmtMoney(state.money) + '</div>' +
+      '<div class="w-sub">Уровень ' + getLevel(state.xp) + ' \u00B7 ' + state.xp + ' XP</div>' +
+    '</div>' +
+    '<div class="w-actions">' +
+      '<div class="w-act" onclick="openInvest()"><div class="w-act-icon">&#x1F4E3;</div><div class="w-act-label">Реклама</div></div>' +
+      '<div class="w-act" onclick="showToast(\'Скоро: вывод средств\')"><div class="w-act-icon">&#x1F4B3;</div><div class="w-act-label">Вывести</div></div>' +
+      '<div class="w-act" onclick="showToast(\'Скоро: магазин\')"><div class="w-act-icon">&#x1F6CD;&#xFE0F;</div><div class="w-act-label">Магазин</div></div>' +
+    '</div>' +
+    '<div class="tx-section"><div class="tx-sec-title">История</div>' + txHtml + '</div>' +
+    '<div style="height:20px"></div>';
+}
+
+function openInvest() {
+  var ps = document.querySelector('.phone-screen');
+  var overlay = document.getElementById('invest-overlay');
+  var modal = document.getElementById('invest-modal');
+  if (ps) { overlay.style.position = 'absolute'; modal.style.position = 'absolute'; ps.appendChild(overlay); ps.appendChild(modal); }
+  overlay.style.display = 'block';
+  modal.style.display = 'block';
+}
+function closeInvest() {
+  document.getElementById('invest-overlay').style.display = 'none';
+  document.getElementById('invest-modal').style.display = 'none';
+}
+function doInvest(amount, label) {
+  closeInvest();
+  if (state.money < amount) { showToast('Недостаточно средств'); return; }
+  var win = Math.random() > 0.4;
+  var delta = win ? amount : -amount;
+  state.money = Math.max(0, state.money + delta);
+  state.xp += 30;
+  state.transactions.unshift({ id: Date.now(), desc: 'Реклама: ' + label, amount: delta, icon: '\u{1F4CA}', date: 'Сейчас', color: win ? 'green' : 'red' });
+  if (state.transactions.length > 20) state.transactions.length = 20;
+  saveState(); updateTopBar();
+  showToast(win ? 'Удача! +' + fmtMoney(delta) : 'Реклама не сработала');
+  renderWalletTab();
+}
+
+// ============================================================
+// QUESTS TAB
+// ============================================================
+function renderQuestsTab() {
+  var el = document.getElementById('tab-quests');
+  if (!el) return;
+  var missions = [
+    { n: 'M1', title: 'Первый клиент', desc: 'Ответь Aziz', done: !!state.completedDialogs.aziz },
+    { n: 'M2', title: 'Распознай скам', desc: 'Заблокируй мошенника', done: !!state.completedDialogs.scammer },
+    { n: 'M3', title: 'Урок от Ментора', desc: 'Изучи ценообразование', done: !!state.completedDialogs.mentor },
+    { n: 'M4', title: 'Накопи 10,000\u20B8', desc: 'Заработай внутри игры', done: state.money >= 10000 },
+    { n: 'M5', title: 'Инвестируй', desc: 'Вложи деньги в рекламу', done: state.transactions.some(function(t) { return t.desc.indexOf('Реклама') >= 0; }) },
+    { n: 'M6', title: 'Уровень 3', desc: 'Набери 400 XP', done: state.xp >= 400 },
+    { n: 'M7', title: 'Стрик 3 дня', desc: 'Заходи 3 дня подряд', done: (state.streak || 0) >= 3 },
+    { n: 'M8', title: 'Мастер переговоров', desc: 'Прокачай переговоры', done: (state.skills.negotiation || 0) >= 11 }
+  ];
+  var dqCount = Object.keys(state.completedDialogs).length;
+  var dailyData = [
+    { key: 'q1', t: 'Ответь на 3 диалога', r: '+50\u20B8', prog: Math.min(dqCount, 3), max: 3, done: state.dailyQuests.q1 },
+    { key: 'q2', t: 'Заработай 1,000\u20B8', r: '+30 XP', prog: state.money >= 1000 ? 1 : 0, max: 1, done: state.dailyQuests.q2 },
+    { key: 'q3', t: 'Распознай 1 скам', r: '+100 XP', prog: state.dailyQuests.q3 ? 1 : 0, max: 1, done: state.dailyQuests.q3 }
+  ];
+  var dailyHtml = dailyData.map(function(q) {
+    var pct = Math.min(100, (q.prog / q.max) * 100);
+    return '<div class="dq-item"><div class="dq-check' + (q.done ? ' done' : '') + '">' + (q.done ? '\u2713' : '') + '</div><div class="dq-body"><div class="dq-title">' + q.t + '</div><div class="dq-reward">' + q.r + '</div></div><div class="dq-prog"><div style="font-size:10px;text-align:right;color:var(--pmuted);margin-bottom:3px">' + q.prog + '/' + q.max + '</div><div class="dq-prog-bar"><div class="dq-prog-fill" style="width:' + pct + '%"></div></div></div></div>';
+  }).join('');
+  var mHtml = missions.map(function(m, i) {
+    var locked = i > 0 && !missions[i - 1].done && !m.done;
+    return '<div class="mission-item' + (locked ? ' locked' : '') + '"><div class="m-num' + (locked ? ' locked' : m.done ? ' done' : '') + '">' + (m.done ? '\u2713' : locked ? '\u{1F512}' : m.n) + '</div><div class="m-body"><div class="m-title">' + m.title + '</div><div class="m-sub">' + (locked ? 'Заблокировано' : m.desc) + '</div></div>' + (!locked ? '<div class="m-arrow">\u203A</div>' : '') + '</div>';
+  }).join('');
+  el.innerHTML = '<div class="ph-head">Квесты</div><div class="quest-section"><div class="qs-title">Ежедневные</div>' + dailyHtml + '</div><div class="quest-section"><div class="qs-title">Основные миссии</div>' + mHtml + '</div><div style="height:20px"></div>';
+}
+
+// ============================================================
+// STATS TAB
+// ============================================================
+var BADGE_MAP = {
+  scam_detector: { icon: '\u{1F6E1}\uFE0F', name: 'Детектор скамов' },
+  negotiator:    { icon: '\u{1F91D}', name: 'Переговорщик' },
+  first_client:  { icon: '\u2B50', name: 'Первый клиент' }
+};
+var SKILL_LIST = [
+  { key: 'sales',       label: 'Продажи',    color: '#007AFF' },
+  { key: 'design',      label: 'Дизайн',     color: '#FF6B6B' },
+  { key: 'marketing',   label: 'Маркетинг',  color: '#4ECDC4' },
+  { key: 'negotiation', label: 'Переговоры', color: '#FFE66D' },
+  { key: 'analytics',   label: 'Аналитика',  color: '#C3A6FF' }
+];
+
+function renderStatsTab() {
+  var el = document.getElementById('tab-stats');
+  if (!el) return;
+  var ftKey = localStorage.getItem('founder_type') || 'Hustler';
+  var ftData = FOUNDER_TYPES[ftKey] || FOUNDER_TYPES.Hustler;
+  var lvl = getLevel(state.xp);
+  var xpProg = getXpProg(state.xp);
+  var xpPct = Math.round(xpProg / 2);
+  var skillsHtml = SKILL_LIST.map(function(sk) {
+    var val = (state.skills && state.skills[sk.key]) || 0;
+    return '<div class="skill-row"><div class="skill-top"><div class="skill-name">' + sk.label + '</div><div class="skill-lvl">' + val + '/100</div></div><div class="skill-bar-out"><div class="skill-bar-in" style="width:' + val + '%;background:' + sk.color + '"></div></div></div>';
+  }).join('');
+  var badgesHtml = '';
+  if (state.badges && state.badges.length > 0) {
+    var bItems = state.badges.map(function(b) {
+      var bd = BADGE_MAP[b];
+      return bd ? '<div class="badge-item"><div class="badge-icon">' + bd.icon + '</div><div class="badge-name">' + bd.name + '</div></div>' : '';
+    }).join('');
+    badgesHtml = '<div class="badges-sec"><div class="tx-sec-title">Бейджи</div><div class="badges-wrap">' + bItems + '</div></div>';
+  }
+  el.innerHTML =
+    '<div class="ph-head">Профиль</div>' +
+    '<div class="stats-hero">' +
+      '<div class="sh-type">Founder Type</div>' +
+      '<div class="sh-name" style="color:' + (ftData.color || 'var(--accent)') + '">' + ftData.emoji + ' ' + ftKey + '</div>' +
+      '<div style="font-size:12px;color:var(--pmuted);margin-bottom:10px;line-height:1.5">' + (ftData.desc || '') + '</div>' +
+      '<div class="xp-bar-top"><span style="color:var(--accent)">Ур. ' + lvl + '</span><span style="color:var(--pmuted)">' + xpProg + '/200 XP</span></div>' +
+      '<div class="xp-bar-out"><div class="xp-bar-in" style="width:' + xpPct + '%"></div></div>' +
+    '</div>' +
+    '<div class="stats-grid">' +
+      '<div class="stat-card"><div class="stat-card-label">Заработок</div><div class="stat-card-val">' + (state.money || 0).toLocaleString('ru') + '<span class="stat-card-unit">\u20B8</span></div></div>' +
+      '<div class="stat-card"><div class="stat-card-label">Всего XP</div><div class="stat-card-val">' + state.xp + '<span class="stat-card-unit">xp</span></div></div>' +
+      '<div class="stat-card"><div class="stat-card-label">Стрик</div><div class="stat-card-val">' + (state.streak || 0) + '<span class="stat-card-unit">дн</span></div></div>' +
+      '<div class="stat-card"><div class="stat-card-label">Уровень</div><div class="stat-card-val">' + lvl + '</div></div>' +
+    '</div>' +
+    '<div class="skills-sec"><div class="tx-sec-title">Скиллы</div>' + skillsHtml + '</div>' +
+    badgesHtml +
+    '<button class="debug-btn" onclick="testSupabase()" style="margin-top:4px">Тест Supabase</button>' +
+    '<button class="debug-btn" onclick="resetProgress()" style="color:#FF3B30;border:1.5px solid rgba(255,59,48,.25);background:rgba(255,59,48,.06)">Сбросить прогресс (Dev Reset)</button>' +
+    '<div style="height:20px"></div>';
+}
+
+// ============================================================
+// RESET & TOAST
+// ============================================================
+function resetProgress() {
+  if (!confirm('Сбросить весь прогресс?\n\nЭто удалит регистрацию, онбординг и прогресс игры.')) return;
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.reload();
+}
+
+var toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3200);
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+(function boot() {
+  loadState();
+  var uid = localStorage.getItem('user_id');
+  var ft = localStorage.getItem('founder_type');
+  if (uid && ft) {
+    dailyCheckIn();
+    showScreen('game');
+  } else if (uid) {
+    startOnboarding();
+  } else {
+    showScreen('landing');
+  }
+}());
+</script>
+</body>
+</html>
