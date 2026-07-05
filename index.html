@@ -1445,5 +1445,4 @@
     load();if(typeof recoverGuestUserSync42G==='function')recoverGuestUserSync42G();applyI18n();window.addEventListener&&window.addEventListener('error',e=>console.error('HUSTLE.OS runtime error',e.error||e.message));if(state.onboarded)showScreen('screen-game');else if(state.pendingAuth?.email)showScreen('screen-auth');else if(state.registered){state.obStep=Math.max(1,state.obStep||1);showScreen('screen-onboarding')}else{state.obStep=0;showScreen('screen-landing')}initAuth();const selfTestResult=selfTest();if(state._migrationNotice)showToast(state._migrationNotice);if(selfTestResult.errors.length)showToast('Beta self-test: нужна проверка в консоли');
   </script>
 </body>
-  <!-- deploy retry: guest users public.users sync -->
 </html>
