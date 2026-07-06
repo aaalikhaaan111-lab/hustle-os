@@ -1602,6 +1602,82 @@
       @media (max-width:420px){.page.pre-reg-shell.pregame-onboarding #screen-onboarding .ob-path-head{padding-right:22px}.page.pre-reg-shell.pregame-onboarding #screen-onboarding .ob-path-icon{width:36px;height:36px;border-radius:14px}.page.pre-reg-shell.pregame-onboarding #screen-onboarding .path-grid{gap:10px}}
     `;document.head.appendChild(patch20CStyle);
 
+    /* PATCH 2.1: onboarding archetypes and final HUSTLE CARD type. */
+    const ARCHETYPES=[
+      {id:'scam_victim',icon:'😵',name:'Scam Victim',description:'Слишком часто верил обещаниям и игнорировал красные флаги.'},
+      {id:'broke_smarter',icon:'💸',name:'Broke But Smarter',description:'Потерял деньги, но стал умнее в решениях.'},
+      {id:'safe_saver',icon:'🧠',name:'Safe Saver',description:'Сохранил капитал, но не всегда использовал возможности.'},
+      {id:'creative_hustler',icon:'🎨',name:'Creative Hustler',description:'Зарабатывал через идеи, контент, дизайн и нестандартные решения.'},
+      {id:'legit_founder',icon:'⚖️',name:'Legit Founder',description:'Балансировал деньги, риск и репутацию как настоящий основатель.'},
+      {id:'trend_victim',icon:'🌀',name:'Trend Victim',description:'Слишком быстро шёл за хайпом и модными идеями.'},
+      {id:'margin_master',icon:'📈',name:'Margin Master',description:'Считал прибыль, цену, расходы и реальные цифры.'},
+      {id:'scam_hunter',icon:'🕵️',name:'Scam Hunter',description:'Замечал подозрительные сделки и проверял детали.'},
+      {id:'growth_player',icon:'🚀',name:'Growth Player',description:'Играл смело, быстро рос и принимал рискованные решения.'},
+      {id:'client_closer',icon:'🤝',name:'Client Closer',description:'Сильно работал с клиентами, доверием и продажами.'}
+    ];
+    function archetypeById21(id){return ARCHETYPES.find(a=>a.id===id)||ARCHETYPES.find(a=>a.id==='legit_founder')||ARCHETYPES[0]}
+    function getArchetypeDescription(archetype){const text=String(archetype||'').replace(/^[^\wА-Яа-я]+/u,'').trim();const found=ARCHETYPES.find(a=>a.name===text||(`${a.icon} ${a.name}`)===String(archetype).trim()||a.id===archetype);return found?found.description:archetypeById21('legit_founder').description}
+    function getPlayerArchetype(s=state){
+      const moneyVal=Number(s.money)||0,earned=Number(s.lifetimeEarned)||0,score=Number(s.finalScore)||computeFinalScore(),risk=Number(s.risk)||0,skill=Number(s.skill)||0,rep=Number(s.reputation)||0,scams=Number(s.story?.scamsAvoided)||0,path=String(s.selectedPath||s.user?.selectedPath||'').toLowerCase(),creative=/design|art|smm|content|video|handmade|music|fashion/.test(path);
+      if((moneyVal<3500&&risk>=62)||(score<7000&&risk>=68))return archetypeById21('scam_victim');
+      if(moneyVal<9000&&skill>=45)return archetypeById21('broke_smarter');
+      if(scams>=5||(/scam/i.test(String(s.bestSkill||''))&&risk<=55))return archetypeById21('scam_hunter');
+      if(earned>=26000&&risk<=52)return archetypeById21('margin_master');
+      if(earned>=24000&&risk>52)return archetypeById21('growth_player');
+      if(rep>=76)return archetypeById21('client_closer');
+      if(creative&&score>=12000)return archetypeById21('creative_hustler');
+      if(risk<=28&&moneyVal>=9000)return archetypeById21('safe_saver');
+      if(risk>=70&&score<17000)return archetypeById21('trend_victim');
+      if(rep>=58&&risk<=60)return archetypeById21('legit_founder');
+      return risk<=45?archetypeById21('safe_saver'):archetypeById21('legit_founder')
+    }
+    function archetypeDisplay21(a){return`${a.icon} ${a.name}`}
+    function archetypeLandingSection21(){return`<section class="prelanding20-section archetype-section21"><div class="prelanding20-label">ФИНАЛЬНЫЙ ТИП</div><h2>Кем ты станешь?</h2><p class="prelanding20-section-text">Твой стиль решений определит финал. Играй 15 дней, принимай решения и получи свой тип в HUSTLE CARD.</p><div class="archetype-grid21">${ARCHETYPES.map(a=>`<article class="archetype-card21"><div class="archetype-icon21">${a.icon}</div><div><b>${a.name}</b><span>${a.description}</span></div></article>`).join('')}</div></section>`}
+    function injectLandingArchetypes21(){const screen=document.getElementById('screen-landing');if(!screen||screen.querySelector('.archetype-section21'))return;const final=screen.querySelector('.prelanding20-final'),inside=screen.querySelector('#prelanding20Inside');if(final)final.insertAdjacentHTML('beforebegin',archetypeLandingSection21());else if(inside)inside.insertAdjacentHTML('afterend',archetypeLandingSection21())}
+    function hustleCardArchetypeBlock21(a=getPlayerArchetype(state)){return`<div class="archetype-result21"><div class="archetype-result-label21">ARCHETYPE</div><div class="archetype-result-name21"><span>${a.icon}</span><b>${a.name}</b></div><p>${a.description}</p></div>`}
+    const patch21Style=document.createElement('style');patch21Style.textContent=`
+      .archetype-section21{position:relative}.archetype-grid21{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px;width:100%;max-width:100%;min-width:0}.archetype-card21{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;min-height:118px;padding:14px;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 48px rgba(0,0,0,.18);min-width:0;overflow:hidden}.archetype-card21:hover{border-color:rgba(183,255,60,.34);background:rgba(255,255,255,.09)}.archetype-icon21{width:36px;height:36px;border-radius:15px;display:grid;place-items:center;background:rgba(183,255,60,.12);border:1px solid rgba(183,255,60,.22);font-size:19px}.archetype-card21 b{display:block;color:#fff;font-size:14px;line-height:1.08;letter-spacing:-.2px}.archetype-card21 span{display:block;margin-top:6px;color:rgba(255,255,255,.58);font-size:11px;line-height:1.35;font-weight:720;overflow-wrap:anywhere}
+      .archetype-result21{padding:16px;border-radius:24px;background:radial-gradient(circle at 10% 0,rgba(183,255,60,.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.045));border:1px solid rgba(183,255,60,.24);box-shadow:0 22px 58px rgba(0,0,0,.22)}.archetype-result-label21{color:#b7ff3c;font-size:11px;font-weight:950;letter-spacing:1.6px}.archetype-result-name21{display:flex;align-items:center;gap:10px;margin-top:8px}.archetype-result-name21 span{width:38px;height:38px;border-radius:16px;display:grid;place-items:center;background:rgba(183,255,60,.13);border:1px solid rgba(183,255,60,.24);font-size:21px}.archetype-result-name21 b{color:#fff;font-size:24px;line-height:1;letter-spacing:-.8px}.archetype-result21 p{margin:9px 0 0;color:rgba(255,255,255,.68);font-size:13px;line-height:1.45;font-weight:720}
+      html[data-theme="light"] .archetype-card21,html[data-theme="light"] .archetype-result21{background:rgba(255,255,255,.82);border-color:rgba(15,23,42,.12);box-shadow:0 18px 44px rgba(31,41,55,.11)}html[data-theme="light"] .archetype-card21 b,html[data-theme="light"] .archetype-result-name21 b{color:#0f172a}html[data-theme="light"] .archetype-card21 span,html[data-theme="light"] .archetype-result21 p{color:#4b5563}
+      @media(max-width:980px){.archetype-grid21{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.archetype-grid21{grid-template-columns:1fr}.archetype-card21{min-height:0}.archetype-result-name21 b{font-size:21px}}
+    `;document.head.appendChild(patch21Style);
+    founderArchetype=function(){const a=getPlayerArchetype(state);return[archetypeDisplay21(a),a.description]};
+    const _hustleCardMarkupPatch21=hustleCardMarkup;hustleCardMarkup=function(opts={}){const markup=_hustleCardMarkupPatch21(opts);return opts.studio?markup:markup+hustleCardArchetypeBlock21(getPlayerArchetype(state))};
+    const _showScreenPatch21=showScreen;showScreen=function(id){const r=_showScreenPatch21(id);if(id==='screen-landing')injectLandingArchetypes21();return r};
+    injectLandingArchetypes21();
+
+    /* PATCH 2.1B: keep HUSTLE CARD signature lesson inside SVG/PNG card. */
+    function splitSignatureLesson21B(text,maxChars=44,maxLines=4){
+      const words=String(text||'').trim().split(/\s+/).filter(Boolean),lines=[];
+      let current='';
+      words.forEach(word=>{
+        if(!current){current=word;return}
+        if((current+' '+word).length<=maxChars){current+=' '+word;return}
+        lines.push(current);current=word
+      });
+      if(current)lines.push(current);
+      if(lines.length<=maxLines)return lines;
+      const kept=lines.slice(0,maxLines-1),rest=lines.slice(maxLines-1).join(' ');
+      kept.push(rest);
+      return kept
+    }
+    function signatureLessonSvg21B(rawText){
+      const lines=splitSignatureLesson21B(rawText,42,4),fontSize=lines.length>=4?21:24,lineGap=lines.length>=4?25:29,startY=1306;
+      return lines.map((line,i)=>`<text x="118" y="${startY+i*lineGap}" fill="#b7ff3c" font-family="Inter,Arial,sans-serif" font-size="${fontSize}" font-weight="950">${procEscape(line)}</text>`).join('')
+    }
+    const patch21BStyle=document.createElement('style');patch21BStyle.textContent=`
+      .founder-card-intro,.archetype-result21,.lesson{box-sizing:border-box;max-width:100%;min-width:0}
+      .founder-card-intro span,.archetype-result21 p,.lesson{white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+      .hustle-card.founder-poster-card,.hustle-card.founder-poster-card .founder-poster-svg{max-width:100%;min-width:0;overflow:hidden}
+    `;document.head.appendChild(patch21BStyle);
+    const _founderPosterSvgPatch21B=founderPosterSvg;founderPosterSvg=function(){
+      const svg=_founderPosterSvgPatch21B(),lesson=founderPosterData().lesson||'';
+      return svg
+        .replace('<rect x="82" y="1228" width="922" height="118" rx="30" fill="rgba(183,255,60,.1)" stroke="rgba(183,255,60,.25)"/>','<rect x="82" y="1228" width="922" height="154" rx="30" fill="rgba(183,255,60,.1)" stroke="rgba(183,255,60,.25)"/>')
+        .replace(/<text x="118" y="1318" fill="#b7ff3c" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="950">[\s\S]*?<\/text>/,signatureLessonSvg21B(lesson))
+        .replace('<text x="82" y="1392" fill="#ffffff" fill-opacity=".45"','<text x="82" y="1408" fill="#ffffff" fill-opacity=".45"')
+    };
+
     function selfTest(){const errors=[],warn=[];const ids=new Set();STORY_EVENTS.forEach((e,i)=>{if(!e.id)errors.push(`STORY_EVENTS[${i}] missing id`);if(ids.has(e.id))errors.push(`Duplicate story id ${e.id}`);ids.add(e.id);if(!NPCS[e.npc])errors.push(`Story ${e.id} has invalid npc ${e.npc}`);if(e.mini&&!MINI_GAMES.some(g=>g.id===e.mini))errors.push(`Story ${e.id} references missing mini-game ${e.mini}`);if(e.term&&!INITIAL_TERMS[e.term])errors.push(`Story ${e.id} references missing term ${e.term}`);if(e.choice&&(!Array.isArray(e.options)||!e.options.length))errors.push(`Story ${e.id} has choice without options`);if(!e.mini&&!e.choice&&!e.info&&!e.final)warn.push(`Story ${e.id} has no action type`)});for(let d=1;d<=15;d++)if(!STORY_EVENTS.some(e=>e.day===d))errors.push(`Day ${d} has no story events`);MINI_GAMES.forEach((g,i)=>{['id','title','category','durationSec','type','data'].forEach(k=>{if(g[k]===undefined||g[k]===null)errors.push(`Mini-game ${i} missing ${k}`)});['rewardMoney','rewardXP','rewardSkill'].forEach(k=>{if(typeof g[k]!=='number')errors.push(`Mini-game ${g.id} missing numeric ${k}`)});if(g.glossaryTerm&&!INITIAL_TERMS[g.glossaryTerm])errors.push(`Mini-game ${g.id} references missing term ${g.glossaryTerm}`)});['userId','language','user','onboarded','money','xp','skill','level','story','arcade','ledger','learnedTerms','transactions','achievements','analyticsLog','settings','legal'].forEach(k=>{if(state[k]===undefined)errors.push(`State missing ${k}`)});const requiredFns=['showScreen','renderGame','openStoryApp','openStoryEvent','startStoryMiniGame','finishMiniGame','acceptStoryReflection','openGlossary','openLegal','resetAll','track','supabaseInsert','saveUserToSupabase','testSupabase'];requiredFns.forEach(fn=>{if(typeof window!=='undefined'&&typeof window[fn]!=='function'&&typeof globalThis[fn]!=='function')errors.push(`Missing function ${fn}`)});const html=(document.getElementById('gameContent')||{}).innerHTML||'';if(html.includes('undefined'))errors.push('Current gameContent contains undefined');if(errors.length)console.error('HUSTLE.OS selfTest FAILED',errors,warn);else console.info('HUSTLE.OS selfTest PASS',warn);state.selfTest={ok:!errors.length,errors,warnings:warn,at:new Date().toISOString()};return state.selfTest}
 
     load();if(typeof recoverGuestUserSync42G==='function')recoverGuestUserSync42G();applyI18n();window.addEventListener&&window.addEventListener('error',e=>console.error('HUSTLE.OS runtime error',e.error||e.message));if(state.onboarded)showScreen('screen-game');else if(state.pendingAuth?.email)showScreen('screen-auth');else if(state.registered){state.obStep=Math.max(1,state.obStep||1);showScreen('screen-onboarding')}else{state.obStep=0;showScreen('screen-landing')}initAuth();const selfTestResult=selfTest();if(state._migrationNotice)showToast(state._migrationNotice);if(selfTestResult.errors.length)showToast('Beta self-test: нужна проверка в консоли');
